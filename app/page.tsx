@@ -1,4 +1,4 @@
-import BalanceCard from "@/components/ui/balance-card/BalanceCard";
+import BalanceCard from "@/components/general/balance-card/BalanceCard";
 import AddTransactionBtn from "@/components/buttons/add-transaction/AddTransactionBtn";
 
 const Home = () => {

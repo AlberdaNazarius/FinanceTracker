@@ -1,3 +1,6 @@
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
 export const formatDate = (dateString: string | undefined): string => {
   if (!dateString) return 'Unknown';
 
@@ -12,4 +15,8 @@ export const formatDate = (dateString: string | undefined): string => {
     month: 'short',
     day: 'numeric'
   }).format(date);
+}
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
 }

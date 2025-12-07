@@ -2,7 +2,7 @@
 
 import React, {useState} from 'react';
 
-const BalanceCard: React.FC = ({}) => {
+const BalanceCard: React.FC = () => {
   const [balance, setBalance] = useState(24582.00);
 
   const [period, setPeriod] = useState<"day" | "week" | "month" | "year">("month")

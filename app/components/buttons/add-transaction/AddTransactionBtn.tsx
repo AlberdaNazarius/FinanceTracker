@@ -1,8 +1,8 @@
 import React from "react";
 
-const AddTransactionBtn: React.FC = ({}) => {
+const AddTransactionBtn: React.FC = () => {
   return (
-    <button className="bg-primary text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors cursor-pointer">
+    <button className="bg-primary font-bold text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors cursor-pointer">
       Add Transaction
     </button>
   );
