@@ -19,7 +19,9 @@
       }
     ],
     "paths": {
-      "@/components/*": ["./app/components/*"]
+      "@/components/*": ["./app/components/*"],
+      "@/helpers/*": ["./app/helpers/*"],
+      "@/enum/*": ["./app/enum/*"]
     }
   },
   "include": [
