@@ -2,6 +2,7 @@
 
 import {useState} from "react"
 import {CircleDollarSign, User, Menu } from "lucide-react"
+import Link from "next/link"
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -18,12 +19,15 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
-            <a href="#" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
+            <Link href="/" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
               Dashboard
-            </a>
-            <a href="#" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
+            </Link>
+            <Link href="/transactions" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
+              Transactions
+            </Link>
+            <Link href="/budgets" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
               Budgets
-            </a>
+            </Link>
           </nav>
 
           {/* User Menu */}
@@ -45,18 +49,15 @@ export default function Header() {
       {isMenuOpen && (
         <div className="md:hidden border-t border-border bg-card px-4 py-3">
           <nav className="flex flex-col gap-3">
-            <a href="#" className="text-sm font-medium text-foreground">
+            <Link href="/" className="text-sm font-medium text-foreground">
               Dashboard
-            </a>
-            <a href="#" className="text-sm font-medium text-muted">
+            </Link>
+            <Link href="/transactions" className="text-sm font-medium text-muted">
               Transactions
-            </a>
-            <a href="#" className="text-sm font-medium text-muted">
+            </Link>
+            <Link href="#" className="text-sm font-medium text-muted">
               Budgets
-            </a>
-            <a href="#" className="text-sm font-medium text-muted">
-              Reports
-            </a>
+            </Link>
           </nav>
         </div>
       )}

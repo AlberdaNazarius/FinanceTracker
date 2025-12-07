@@ -1,7 +1,11 @@
-const Home = ()=> {
+import BalanceCard from "@/components/ui/balance-card/BalanceCard";
+import AddTransactionBtn from "@/components/buttons/add-transaction/AddTransactionBtn";
+
+const Home = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      Hello, Finance Tracker!
+    <div className="flex flex-col items-center gap-6">
+      <BalanceCard/>
+      <AddTransactionBtn/>
     </div>
   );
 }
