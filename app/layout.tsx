@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import React from "react";
+import Header from '@/components/common/header/Header';
+
 
 export const metadata: Metadata = {
   title: "Finance Tacker",
@@ -15,6 +17,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
+        <Header/>
         {children}
       </body>
     </html>
