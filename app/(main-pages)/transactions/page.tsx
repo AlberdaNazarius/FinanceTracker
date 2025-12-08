@@ -3,7 +3,7 @@ import {formatDate} from "@/helpers/utils";
 
 const Transactions = () => {
   return (
-    <div className='border-1 rounded-2xl w-full self-start mt-4'>
+    <div className='border-1 rounded-2xl w-full self-start'>
       <table className="w-full table-fixed sm:table-auto">
         <thead
           className="hidden sm:table-header-group bg-card/50 border-b border-border text-sm font-semibold text-muted-foreground"

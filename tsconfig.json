@@ -21,7 +21,8 @@
     "paths": {
       "@/components/*": ["./app/components/*"],
       "@/helpers/*": ["./app/helpers/*"],
-      "@/enum/*": ["./app/enum/*"]
+      "@/types/*": ["./app/types/*"],
+      "@/enum/*": ["./app/enum/*"],
     }
   },
   "include": [

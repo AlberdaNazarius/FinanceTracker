@@ -18,7 +18,8 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <Header/>
-        <main className='flex min-h-screen items-center justify-center bg-background px-2'>
+        {/*min-h-screen*/}
+        <main className='flex mt-4 items-center justify-center bg-background px-2 mx-auto max-w-7xl'>
           {children}
         </main>
       </body>
