@@ -1,5 +1,6 @@
 import {Transaction} from "@/types/Transaction";
 import {TransactionType} from "@/enum/TransactionType";
+import {Category} from "@/types/Category";
 
 export const TRANSACTIONS: Transaction[] = [
   {
@@ -10,7 +11,7 @@ export const TRANSACTIONS: Transaction[] = [
       name: 'Food',
       description: 'Expenses for food and groceries',
     },
-    date: new Date(),
+    transaction_date: new Date(),
     amount: 75.50,
     currency: 'USD',
   },
@@ -22,7 +23,7 @@ export const TRANSACTIONS: Transaction[] = [
       name: 'Bills',
       description: 'Monthly utility bills',
     },
-    date: new Date(),
+    transaction_date: new Date(),
     amount: 120.00,
     currency: 'USD',
   },
@@ -34,11 +35,49 @@ export const TRANSACTIONS: Transaction[] = [
       name: 'Healthcare',
       description: 'Health and fitness expenses',
     },
-    date: new Date(),
+    transaction_date: new Date(),
     amount: 45.00,
     currency: 'USD',
   },
 ];
 
-export let incomeCategories: string[] = ["Salary", "Freelance", "Investment", "Gift", "Other"]
-export let expenseCategories: string[] = ["Food", "Transport", "Shopping", "Entertainment", "Bills", "Healthcare", "Other"]
+// export let incomeCategories: Category[] = [
+//   {
+//     name: "Salary",
+//     description: "Monthly salary from employer",
+//   },
+//   {
+//     name: "Freelancing",
+//     description: "Income from freelance projects",
+//   },
+//   {
+//     name: "Investments",
+//     description: "Earnings from investments",
+//   },
+//   {
+//     name: "Gifts",
+//     description: "Monetary gifts received",
+//   }
+// ]
+export let CATEGORIES: Category[] = [
+  {
+    name: "Income",
+    description: "Sources of income",
+  },
+  {
+    name: "Food",
+    description: "Expenses for food and groceries",
+  },
+  {
+    name: "Transportation",
+    description: "Costs for public transport and fuel",
+  },
+  {
+    name: "Utilities",
+    description: "Monthly utility bills",
+  },
+  {
+    name: "Entertainment",
+    description: "Expenses for movies, events, etc.",
+  }
+]

@@ -1,0 +1,26 @@
+import * as yup from 'yup';
+import {TransactionType} from "@/enum/TransactionType";
+
+export const transactionSchema = yup.object({
+  type: yup
+    .mixed<TransactionType>()
+    .oneOf(Object.values(TransactionType))
+    .required("Transaction type is required"),
+  description: yup.string().optional(),
+  category: yup.object({
+    name: yup.string().required("Category name is required"),
+    description: yup.string().optional(),
+  }).nullable()
+    .required("Category is required"),
+  amount: yup
+    .number()
+    .typeError("Amount must be a number")
+    .required("Amount is required")
+    .min(0, "Amount must be non-negative"),
+
+  currency: yup.string().required("Currency is required"),
+  transaction_date: yup
+    .date()
+    .typeError("Invalid date")
+    .required("Transaction date is required"),
+});

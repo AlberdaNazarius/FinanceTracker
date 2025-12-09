@@ -15,15 +15,15 @@ const Transactions = () => {
             <th className="py-4 px-6 text-right">Amount</th>
           </tr>
         </thead>
-                <tbody className='bg-card'>
-        {TRANSACTIONS.map((transaction) => (
-          <tr key={transaction.id} className="border-b border-border last:border-0 hover:bg-accent/50">
-            <td className="py-4 px-6 text-left">{transaction?.description ?? 'N/A'}</td>
-            <td className="py-4 px-6 text-left">{transaction?.category?.name ?? 'N/A'}</td>
-            <td className="py-4 px-6 text-left">{formatDate(transaction?.date)}</td>
-            <td className="py-4 px-6 text-right">{transaction?.amount ?? 'N/A'}</td>
-          </tr>
-        ))}
+        <tbody className='bg-card'>
+          {TRANSACTIONS.map((transaction) => (
+            <tr key={transaction.id} className="border-b border-border last:border-0 hover:bg-accent/50">
+              <td className="py-4 px-6 text-left">{transaction?.description ?? 'N/A'}</td>
+              <td className="py-4 px-6 text-left">{transaction?.category?.name ?? 'N/A'}</td>
+              <td className="py-4 px-6 text-left">{formatDate(transaction?.transaction_date)}</td>
+              <td className="py-4 px-6 text-right">{transaction?.amount ?? 'N/A'}</td>
+            </tr>
+          ))}
         </tbody>
       </table>
     </div>

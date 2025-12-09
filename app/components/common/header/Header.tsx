@@ -1,7 +1,7 @@
 "use client"
 
 import {useState} from "react"
-import {CircleDollarSign, User, Menu } from "lucide-react"
+import {CircleDollarSign, User, Menu} from "lucide-react"
 import Link from "next/link"
 
 export default function Header() {
@@ -22,10 +22,12 @@ export default function Header() {
             <Link href="/" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
               Dashboard
             </Link>
-            <Link href="/transactions" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
+            <Link href="/transactions"
+                  className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
               Transactions
             </Link>
-            <Link href="/budgets" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
+            <Link href="/budgets"
+                  className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
               Budgets
             </Link>
           </nav>

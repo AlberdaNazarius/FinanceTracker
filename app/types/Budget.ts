@@ -4,5 +4,5 @@ export type Budget = {
   id: number;
   amount: number;
   category: Category;
-  date: Date;
+  created_at?: Date;
 }

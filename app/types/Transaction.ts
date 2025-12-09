@@ -2,11 +2,13 @@ import {TransactionType} from "@/enum/TransactionType";
 import {Category} from "@/types/Category";
 
 export type Transaction = {
-  id: number;
+  id?: number;
+  user_id?: number;
   type: TransactionType,
-  description: string;
-  category: Category;
-  date: Date;
+  category: Category | null;
   amount: number;
   currency: string;
+  transaction_date: Date;
+  description?: string;
+  created_at?: Date;
 }
