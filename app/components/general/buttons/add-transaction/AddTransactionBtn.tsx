@@ -24,7 +24,6 @@ const AddTransactionBtn: React.FC = () => {
   }
 
   const handleSubmit = async (values: Transaction) => {
-    console.log(values);
     const newTransaction: Transaction = {
       ...values,
       transaction_date: new Date(values.transaction_date)

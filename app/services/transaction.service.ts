@@ -1,8 +1,11 @@
 import {Transaction} from "@/types/Transaction";
-import {TRANSACTIONS} from "@/helpers/data";
+import axios from "axios";
 
 const addTransaction = async (transactionData: Transaction) => {
-  TRANSACTIONS.push(transactionData);
+  await axios.post("/api/transactions", {
+    ...transactionData,
+    category: transactionData?.category?.name,
+  });
 }
 
 export const TransactionService = {
