@@ -1,24 +1,42 @@
-export const TRANSACTIONS = [
+import {Transaction} from "@/types/Transaction";
+import {TransactionType} from "@/enum/TransactionType";
+
+export const TRANSACTIONS: Transaction[] = [
   {
     id: 1,
+    type: TransactionType.EXPENSE,
     description: 'Grocery Shopping',
-    category: 'Food',
-    date: '2024-06-01',
+    category: {
+      name: 'Food',
+      description: 'Expenses for food and groceries',
+    },
+    date: new Date(),
     amount: 75.50,
+    currency: 'USD',
   },
   {
     id: 2,
+    type: TransactionType.EXPENSE,
     description: 'Electricity Bill',
-    category: 'Bills',
-    date: '2024-06-03',
+    category: {
+      name: 'Bills',
+      description: 'Monthly utility bills',
+    },
+    date: new Date(),
     amount: 120.00,
+    currency: 'USD',
   },
   {
     id: 3,
+    type: TransactionType.EXPENSE,
     description: 'Gym Membership',
-    category: 'Healthcare',
-    date: '2024-06-05',
+    category: {
+      name: 'Healthcare',
+      description: 'Health and fitness expenses',
+    },
+    date: new Date(),
     amount: 45.00,
+    currency: 'USD',
   },
 ];
 

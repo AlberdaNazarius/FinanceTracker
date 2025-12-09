@@ -1,7 +1,8 @@
 import {Category} from "@/types/Category";
 
 export type Budget = {
-  amount: bigint;
+  id: number;
+  amount: number;
   category: Category;
   date: Date;
 }

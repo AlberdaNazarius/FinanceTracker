@@ -117,12 +117,10 @@ const AddTransactionBtn: React.FC = () => {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <DialogClose>
-              <Button type="button" variant="ghost" className="flex-1 cursor-pointer">
-                Cancel
-              </Button>
+            <DialogClose className="flex-1 cursor-pointer">
+              Cancel
             </DialogClose>
-            <Button type="submit" className="flex-1 cursor-pointer">
+            <Button type="submit" className="flex-2 cursor-pointer">
               Add
             </Button>
           </div>

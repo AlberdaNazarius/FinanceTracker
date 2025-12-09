@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
-export const formatDate = (dateString: string | undefined): string => {
+export const formatDate = (dateString: Date): string => {
   if (!dateString) return 'Unknown';
 
   const date = new Date(dateString);
