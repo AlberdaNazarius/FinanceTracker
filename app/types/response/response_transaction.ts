@@ -1,17 +1,15 @@
 import {TransactionType} from "@/enum/TransactionType";
 import {Category} from "@/types/Category";
+import {Currency} from "@/types/currency";
 
-export type Transaction = {
+export type ResponseTransaction = {
   id?: number;
   user_id?: number;
   type: TransactionType,
-  category: Category | null;
+  category: Category;
   amount: number;
-  currency: {
-    code: string;
-    unit_text: string;
-  };
+  currency: Currency
   transaction_date: Date;
   description?: string;
-  created_at?: Date;
+  created_at: Date;
 }

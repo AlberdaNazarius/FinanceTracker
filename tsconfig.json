@@ -23,6 +23,7 @@
       "@/helpers/*": ["./app/helpers/*"],
       "@/types/*": ["./app/types/*"],
       "@/enum/*": ["./app/enum/*"],
+      "@/service/*": ["./app/services/*"],
     }
   },
   "include": [

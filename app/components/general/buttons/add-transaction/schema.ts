@@ -7,18 +7,14 @@ export const transactionSchema = yup.object({
     .oneOf(Object.values(TransactionType))
     .required("Transaction type is required"),
   description: yup.string().optional(),
-  category: yup.object({
-    name: yup.string().required("Category name is required"),
-    description: yup.string().optional(),
-  }).nullable()
-    .required("Category is required"),
+  category_id: yup.string().required("Category is required"),
   amount: yup
     .number()
     .typeError("Amount must be a number")
     .required("Amount is required")
     .min(0, "Amount must be non-negative"),
 
-  currency: yup.string().required("Currency is required"),
+  currency_id: yup.string().required("Currency is required"),
   transaction_date: yup
     .date()
     .typeError("Invalid date")

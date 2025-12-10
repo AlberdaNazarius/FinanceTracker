@@ -1,5 +1,5 @@
-import {Transaction} from "@/types/Transaction";
 import axios from "axios";
+import {RequestTransaction} from "@/types/request/request_transaction";
 
 // Testing API integration for transactions
 const getTransactions = async () => {
@@ -7,11 +7,8 @@ const getTransactions = async () => {
   return response.data;
 }
 
-const addTransaction = async (transactionData: Transaction) => {
-  await axios.post("/api/transactions", {
-    ...transactionData,
-    category: transactionData?.category?.name,
-  });
+const addTransaction = async (transactionData: RequestTransaction) => {
+  await axios.post("/api/transactions", transactionData);
 }
 
 export const TransactionService = {

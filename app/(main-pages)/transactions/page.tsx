@@ -1,12 +1,12 @@
 'use client';
 
 import {formatDate, formatMoney} from "@/helpers/utils";
-import {TransactionService} from "../../services/transaction.service";
+import {TransactionService} from "@/service/transaction.service";
 import {useEffect, useState} from "react";
-import {Transaction} from "@/types/Transaction";
+import {ResponseTransaction} from "@/types/response/response_transaction";
 
 const Transactions = () => {
-  const [userTransactions, setUserTransactions] = useState<Transaction[]>([]);
+  const [userTransactions, setUserTransactions] = useState<ResponseTransaction[]>([]);
 
   useEffect(() => {
     const fetchTransactions = async () => {

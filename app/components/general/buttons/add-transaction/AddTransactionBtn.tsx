@@ -1,38 +1,53 @@
 "use client"
 
-import React from "react"
+import React, {useEffect, useState} from "react"
 import {Dialog, DialogTrigger, DialogContent, DialogClose, DialogHeader, DialogTitle} from "@/components/ui/dialog"
 import {Input} from "@/components/ui/input"
 import {Label} from "@/components/ui/label"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
 import {Button} from "@/components/ui/button"
-import {CATEGORIES} from "@/helpers/data";
 import {TransactionType} from "@/enum/TransactionType";
-import {TransactionService} from "../../../../services/transaction.service";
-import {Transaction} from "@/types/Transaction";
+import {TransactionService} from "@/service/transaction.service";
 import {Formik} from 'formik';
 import {transactionSchema} from "@/components/general/buttons/add-transaction/schema";
+import {CategoryService} from "@/service/category.service";
+import {Category} from "@/types/Category";
+import {CURRENCIES} from "@/helpers/constants";
+import {RequestTransaction} from "@/types/request/request_transaction";
 
 const AddTransactionBtn: React.FC = () => {
-  const formInitState: Transaction = {
+  const formInitState: RequestTransaction = {
+    category_id: null,
+    currency_id: CURRENCIES[0].id,
     amount: 0,
     type: TransactionType.EXPENSE,
-    category: null,
     description: "",
-    currency: {
-      code: "EUR",
-      unit_text: "Euro"
-    },
     transaction_date: new Date(),
   }
 
-  const handleSubmit = async (values: Transaction) => {
-    const newTransaction: Transaction = {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  const handleSubmit = async (values: RequestTransaction) => {
+    // console.log(values)
+    const newTransaction: RequestTransaction = {
       ...values,
       transaction_date: new Date(values.transaction_date)
     }
     await TransactionService.addTransaction(newTransaction);
   }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await CategoryService.getCategories();
+        console.log("Fetched data:", response);
+        setCategories(response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    }
+    fetchData();
+  }, []);
 
   return (
     <Dialog>
@@ -63,6 +78,7 @@ const AddTransactionBtn: React.FC = () => {
                     value={values.amount}
                     onChange={handleChange}
                   />
+                {errors.amount && <p className="text-sm text-red-500 mt-1">{errors.amount}</p>}
                 </div>
               </div>
 
@@ -77,31 +93,33 @@ const AddTransactionBtn: React.FC = () => {
                     <SelectValue placeholder="Select a type"/>
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value={TransactionType.EXPENSE}>Expenses</SelectItem>
                     <SelectItem value={TransactionType.INCOME}>Income</SelectItem>
-                    <SelectItem value={TransactionType.EXPENSE}>Expense</SelectItem>
                   </SelectContent>
                 </Select>
+                {errors.type && <p className="text-sm text-red-500 mt-1">{errors.type}</p>}
               </div>
 
               <div className="space-y-2">
                 <Label>Category</Label>
                 <Select
-                  name='category'
-                  value={values?.category?.name ?? ""}
+                  name='category_id'
+                  value={values?.category_id ?? ""}
                   onValueChange={(val) =>
-                    setFieldValue("category", { name: val })}
+                    setFieldValue("category_id", val)}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a category"/>
                   </SelectTrigger>
                   <SelectContent>
-                    {CATEGORIES?.map((category) => (
-                      <SelectItem key={category.name} value={category.name}>
+                    {categories?.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
                         {category.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
+                {errors.category_id && <p className="text-sm text-red-500 mt-1">{errors.category_id}</p>}
               </div>
 
               <div className="space-y-2">
@@ -112,6 +130,7 @@ const AddTransactionBtn: React.FC = () => {
                   value={values.description}
                   onChange={handleChange}
                 />
+                {errors.description && <p className="text-sm text-red-500 mt-1">{errors.description}</p>}
               </div>
 
               <div className="space-y-2">
@@ -123,6 +142,8 @@ const AddTransactionBtn: React.FC = () => {
                   onChange={handleChange}
                 />
               </div>
+
+              {errors.currency_id && <p className="text-sm text-red-500 mt-1">{errors.currency_id}</p>}
 
               <div className="flex gap-3 pt-2">
                 <DialogClose className="flex-1 cursor-pointer">
