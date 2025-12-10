@@ -1,5 +1,5 @@
 import {TransactionType} from "@/enum/TransactionType";
-import {Category} from "@/types/Category";
+import {Category} from "@/types/category";
 import {Currency} from "@/types/currency";
 
 export type ResponseTransaction = {

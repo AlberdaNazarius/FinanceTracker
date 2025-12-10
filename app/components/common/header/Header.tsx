@@ -26,7 +26,7 @@ export default function Header() {
                   className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
               Transactions
             </Link>
-            <Link href="/budgets"
+            <Link href="/budget"
                   className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
               Budgets
             </Link>

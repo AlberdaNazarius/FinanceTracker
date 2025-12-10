@@ -11,7 +11,7 @@ import {TransactionService} from "@/service/transaction.service";
 import {Formik} from 'formik';
 import {transactionSchema} from "@/components/general/buttons/add-transaction/schema";
 import {CategoryService} from "@/service/category.service";
-import {Category} from "@/types/Category";
+import {Category} from "@/types/category";
 import {CURRENCIES} from "@/helpers/constants";
 import {RequestTransaction} from "@/types/request/request_transaction";
 
