@@ -20,3 +20,12 @@ export const formatDate = (dateString: Date | null): string => {
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+
+export const formatMoney = (amount: number | null, code: string | null) => {
+  if (amount === null || code === null) return 'N/A';
+  return new Intl.NumberFormat("en", {
+    style: "currency",
+    currency: code,
+  }).format(amount);
+}

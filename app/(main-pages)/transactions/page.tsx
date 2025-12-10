@@ -1,7 +1,26 @@
-import {TRANSACTIONS} from "@/helpers/data";
-import {formatDate} from "@/helpers/utils";
+'use client';
+
+import {formatDate, formatMoney} from "@/helpers/utils";
+import {TransactionService} from "../../services/transaction.service";
+import {useEffect, useState} from "react";
+import {Transaction} from "@/types/Transaction";
 
 const Transactions = () => {
+  const [userTransactions, setUserTransactions] = useState<Transaction[]>([]);
+
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await TransactionService.getTransactions();
+        console.log("Fetched transactions:", response);
+        setUserTransactions(response.data);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      }
+    }
+    fetchTransactions();
+  }, []);
+
   return (
     <div className='border-1 rounded-2xl w-full self-start'>
       <table className="w-full table-fixed sm:table-auto">
@@ -16,12 +35,12 @@ const Transactions = () => {
           </tr>
         </thead>
         <tbody className='bg-card'>
-          {TRANSACTIONS.map((transaction) => (
+          {userTransactions.map((transaction) => (
             <tr key={transaction.id} className="border-b border-border last:border-0 hover:bg-accent/50">
               <td className="py-4 px-6 text-left">{transaction?.description ?? 'N/A'}</td>
               <td className="py-4 px-6 text-left">{transaction?.category?.name ?? 'N/A'}</td>
               <td className="py-4 px-6 text-left">{formatDate(transaction?.transaction_date)}</td>
-              <td className="py-4 px-6 text-right">{transaction?.amount ?? 'N/A'}</td>
+              <td className="py-4 px-6 text-right">{formatMoney(transaction?.amount, transaction?.currency?.code)}</td>
             </tr>
           ))}
         </tbody>

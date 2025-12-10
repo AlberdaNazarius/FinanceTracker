@@ -19,7 +19,10 @@ const AddTransactionBtn: React.FC = () => {
     type: TransactionType.EXPENSE,
     category: null,
     description: "",
-    currency: "USD",
+    currency: {
+      code: "EUR",
+      unit_text: "Euro"
+    },
     transaction_date: new Date(),
   }
 

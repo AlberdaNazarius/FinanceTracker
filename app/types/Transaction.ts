@@ -7,7 +7,10 @@ export type Transaction = {
   type: TransactionType,
   category: Category | null;
   amount: number;
-  currency: string;
+  currency: {
+    code: string;
+    unit_text: string;
+  };
   transaction_date: Date;
   description?: string;
   created_at?: Date;
