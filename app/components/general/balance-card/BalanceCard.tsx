@@ -10,19 +10,18 @@ type BalanceCardProps = {
 }
 
 const BalanceCard: React.FC<BalanceCardProps> = ({amount, title, numberColor}) => {
-  const [balance, setBalance] = useState(amount);
 
   return (
     <div className="rounded-[var(--radius-lg)] bg-card p-4 sm:p-6 shadow-sm border border-border">
       <div className="flex flex-col justify-center items-center gap-4">
         <div>
-          <p className="text-sm text-muted mb-1">{title}</p>
+          <p className="text-sm text-muted mb-1 font-semibold">{title}</p>
           <h2
             className={cn(
               "text-3xl sm:text-4xl font-bold text-foreground",
               numberColor ?? `text-[${numberColor}]`
             )}>
-            ${balance}
+            ${amount}
           </h2>
         </div>
       </div>

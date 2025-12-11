@@ -5,6 +5,7 @@ import {CircleDollarSign, User, Menu} from "lucide-react"
 import Link from "next/link"
 import useUserStore from "@/store/UserStore";
 import {AuthService} from "@/service/auth.service";
+import {Routes} from "@/enum/routes";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -45,7 +46,7 @@ export default function Header() {
               <div className="flex gap-1 items-center font-semibold justify-center">
                 <User className='h-5 w-5'/>
                 <span className="text-sm text-foreground">{user?.username}</span>
-                <button onClick={AuthService.logout}>
+                <button className='text-sm text-foreground ml-2 cursor-pointer' onClick={AuthService.logout}>
                   Logout
                 </button>
               </div>
@@ -72,13 +73,13 @@ export default function Header() {
       {isMenuOpen && (
         <div className="md:hidden border-t border-border bg-card px-4 py-3">
           <nav className="flex flex-col gap-3">
-            <Link href="/" className="text-sm font-medium text-foreground">
+            <Link href={Routes.HOME} className="text-sm font-medium text-foreground">
               Dashboard
             </Link>
-            <Link href="/transactions" className="text-sm font-medium text-muted">
+            <Link href={Routes.TRANSACTIONS} className="text-sm font-medium text-muted">
               Transactions
             </Link>
-            <Link href="#" className="text-sm font-medium text-muted">
+            <Link href={Routes.BUDGET} className="text-sm font-medium text-muted">
               Budgets
             </Link>
           </nav>

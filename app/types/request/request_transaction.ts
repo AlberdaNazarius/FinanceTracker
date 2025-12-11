@@ -1,4 +1,4 @@
-import {TransactionType} from "@/enum/TransactionType";
+import {TransactionType} from "@/enum/transaction-type";
 
 export type RequestTransaction = {
   user_id?: number;

@@ -1,4 +1,4 @@
-import {TransactionType} from "@/enum/TransactionType";
+import {TransactionType} from "@/enum/transaction-type";
 import {Category} from "@/types/category";
 import {Currency} from "@/types/currency";
 

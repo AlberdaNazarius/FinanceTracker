@@ -6,16 +6,17 @@ import {Input} from "@/components/ui/input"
 import {Label} from "@/components/ui/label"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
 import {Button} from "@/components/ui/button"
-import {TransactionType} from "@/enum/TransactionType";
+import {TransactionType} from "@/enum/transaction-type";
 import {TransactionService} from "@/service/transaction.service";
 import {Formik} from 'formik';
-import {transactionSchema} from "@/components/general/buttons/add-transaction/schema";
+import {transactionSchema} from "@/components/general/buttons/add-transaction-btn/schema";
 import {CategoryService} from "@/service/category.service";
 import {Category} from "@/types/category";
 import {CURRENCIES} from "@/helpers/constants";
 import {RequestTransaction} from "@/types/request/request_transaction";
 
 const AddTransactionBtn: React.FC = () => {
+  const [open, setOpen] = useState(false);
   const formInitState: RequestTransaction = {
     category_id: null,
     currency_id: CURRENCIES[0].id,
@@ -34,13 +35,14 @@ const AddTransactionBtn: React.FC = () => {
       transaction_date: new Date(values.transaction_date)
     }
     await TransactionService.addTransaction(newTransaction);
+    setOpen(false);
   }
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await CategoryService.getCategories();
-        console.log("Fetched data:", response);
+        //console.log("Fetched data:", response);
         setCategories(response.data);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -50,7 +52,7 @@ const AddTransactionBtn: React.FC = () => {
   }, []);
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
         className="w-full bg-primary font-bold text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors cursor-pointer">
         Add Transaction

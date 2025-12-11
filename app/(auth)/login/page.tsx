@@ -12,6 +12,7 @@ import {Formik} from 'formik';
 import {schema} from "./schema";
 import {useRouter} from "next/navigation";
 import {AuthService} from "@/service/auth.service";
+import {Routes} from "@/enum/routes";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function LoginPage() {
     // console.log("Login submitted", values)
     if (!values) return;
     await AuthService.login(values.email, values.password);
-    router.replace('/');
+    router.replace(Routes.HOME);
   }
 
   return (
@@ -139,7 +140,7 @@ export default function LoginPage() {
           {/* Sign Up Link */}
           <p className="mt-6 text-center text-sm text-muted-foreground">
             <span className='mr-2'>Don&#39;t have an account?</span>
-            <Link href="/signup" className="text-primary hover:text-primary/80 font-medium transition-colors">
+            <Link href={Routes.SIGN_UP} className="text-primary hover:text-primary/80 font-medium transition-colors">
               Sign up
             </Link>
           </p>

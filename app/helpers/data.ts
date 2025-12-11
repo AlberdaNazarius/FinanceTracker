@@ -1,5 +1,5 @@
 import {ResponseTransaction} from "@/types/response/response_transaction";
-import {TransactionType} from "@/enum/TransactionType";
+import {TransactionType} from "@/enum/transaction-type";
 import {Category} from "@/types/category";
 
 // export const TRANSACTIONS: ResponseTransaction[] = [

@@ -10,6 +10,7 @@ import {Formik} from 'formik';
 import {schema} from "./schema";
 import { useRouter } from 'next/navigation';
 import {AuthService} from "@/service/auth.service";
+import {Routes} from "@/enum/routes";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function SignUpPage() {
     // console.log("Sign in form values", values)
     if (!values) return;
     await AuthService.signup(values.username, values.email, values.password);
-    router.replace('/login');
+    router.replace(Routes.HOME);
   }
 
   return (
@@ -161,7 +162,7 @@ export default function SignUpPage() {
           {/* Sign In Link */}
           <p className="mt-6 text-center text-sm text-muted-foreground">
             <span className='mr-2'>Already have an account?</span>
-            <Link href="/login" className="text-primary hover:text-primary/80 font-medium transition-colors">
+            <Link href={Routes.LOGIN} className="text-primary hover:text-primary/80 font-medium transition-colors">
               Sign in
             </Link>
           </p>

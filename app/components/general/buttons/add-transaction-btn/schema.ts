@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import {TransactionType} from "@/enum/TransactionType";
+import {TransactionType} from "@/enum/transaction-type";
 
 export const transactionSchema = yup.object({
   type: yup
