@@ -8,12 +8,25 @@ import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
 import {Label} from "@/components/ui/label"
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
+import {createClient} from "@/helpers/supabase/client";
+import {Formik} from 'formik';
+import {schema} from "./schema";
 
 export default function LoginPage() {
+  const supabase = createClient();
+  const formInitState = {
+    email: '',
+    password: '',
+  };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    console.log("Login submitted")
+  const handleSubmit = async (values: { email: string, password: string }) => {
+    // console.log("Login submitted", values)
+    if (!values) return;
+
+    await supabase.auth.signInWithPassword({
+      email: values.email,
+      password: values.password
+    });
   }
 
   return (
@@ -23,7 +36,7 @@ export default function LoginPage() {
         <Link href="/" className="flex items-center gap-3">
           <div
             className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
-            <CircleDollarSign className='h-7 w-7 text-primary-foreground' />
+            <CircleDollarSign className='h-7 w-7 text-primary-foreground'/>
           </div>
           <span
             className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
@@ -39,29 +52,49 @@ export default function LoginPage() {
           <CardDescription>Sign in to your account to continue</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email Input */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input type="email" id="email" placeholder="you@example.com" required/>
-            </div>
+          <Formik
+            initialValues={formInitState}
+            validationSchema={schema}
+            onSubmit={handleSubmit}
+          >
+            {({values, handleChange, handleSubmit, errors}) => (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div className="space-y-2">
+                  <Label className='font-semibold' htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={values.email}
+                    onChange={handleChange}
+                  />
+                  {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+                </div>
 
-            {/* Password Input */}
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <Link href="#" className="text-sm text-primary hover:text-primary/80 transition-colors">
-                  Forgot password?
-                </Link>
-              </div>
-              <Input type="password" id="password" placeholder="Enter your password" required/>
-            </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className='font-semibold' htmlFor="password">Password</Label>
+                    <Link href="#" className="text-sm text-primary hover:text-primary/80 transition-colors">
+                      Forgot password?
+                    </Link>
+                  </div>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Enter your password"
+                    value={values.password}
+                    onChange={handleChange}
+                  />
+                  {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
+                </div>
 
-            {/* Submit Button */}
-            <Button type="submit" className="w-full cursor-pointer">
-              Sign in
-            </Button>
-          </form>
+                {/* Submit Button */}
+                <Button type="submit" className="w-full cursor-pointer">
+                  Sign in
+                </Button>
+              </form>
+            )}
+          </Formik>
 
           {/* Divider */}
           <div className="relative my-6">

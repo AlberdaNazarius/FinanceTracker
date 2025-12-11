@@ -3,9 +3,11 @@
 import {useState} from "react"
 import {CircleDollarSign, User, Menu} from "lucide-react"
 import Link from "next/link"
+import useUserStore from "@/store/UserStore";
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const {user} = useUserStore();
 
   return (
     <header className="border-b border-border bg-card">
@@ -22,22 +24,37 @@ export default function Header() {
             <Link href="/" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
               Dashboard
             </Link>
-            <Link href="/transactions"
-                  className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
+            <Link
+              href="/transactions"
+              className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
+            >
               Transactions
             </Link>
-            <Link href="/budget"
-                  className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
+            <Link
+              href="/budget"
+              className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
+            >
               Budgets
             </Link>
           </nav>
 
           {/* User Menu */}
           <div className="flex items-center gap-3">
-            <div className="flex gap-1 items-center font-semibold justify-center">
-              <User className='h-5 w-5'/>
-              <span className="text-sm text-foreground">User</span>
-            </div>
+            {user ? (
+              <div className="flex gap-1 items-center font-semibold justify-center">
+                <User className='h-5 w-5'/>
+                <span className="text-sm text-foreground">{user?.username}</span>
+              </div>
+            ) : (
+              <div>
+                <Link
+                  href="/login"
+                  className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
+                >
+                  Login
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Mobile menu button */}

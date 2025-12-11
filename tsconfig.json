@@ -24,6 +24,7 @@
       "@/types/*": ["./app/types/*"],
       "@/enum/*": ["./app/enum/*"],
       "@/service/*": ["./app/services/*"],
+      "@/store/*": ["./app/store/*"],
     }
   },
   "include": [

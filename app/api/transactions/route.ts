@@ -22,8 +22,7 @@ export async function GET() {
     }
 
     return NextResponse.json({ data }, { status: 200 });
-  }
-  catch (err) {
+  } catch (err) {
     console.error(err);
     return NextResponse.json(
       { error: "Invalid request body" },
