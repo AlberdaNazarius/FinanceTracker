@@ -8,33 +8,42 @@ const getUser = async () => {
   return response.data;
 }
 
-const getUserRequest = async (): Promise<User> => {
-  const cookieStore = await cookies();
-  const supabase = createClient(cookieStore);
+const getUserRequest = async (): Promise<User | null> => {
+  try {
+    const cookieStore = await cookies();
+    const supabase = createClient(cookieStore);
 
-  const {
-    data: { user: authUser },
-  } = await supabase.auth.getUser();
+    const {
+      data: {user: authUser},
+    } = await supabase.auth.getUser();
 
-  if (!authUser) {
-    return Promise.reject();
-  }
+    if (!authUser) {
+      return null;
+    }
 
-  const { data: profile } = await supabase
-    .from("user")
-    .select(`
+    const {data: profile} = await supabase
+      .from("user")
+      .select(`
         username,
         balance,
         preferred_currency:preferred_currency_id (*)
       `)
-    .eq("id", authUser.id)
-    .single();
-  
-  if (!profile) {
+      .eq("id", authUser.id)
+      .single();
+
+    const userProfile: User = {
+      username: profile?.username,
+      balance: profile?.balance,
+      preferred_currency: Array.isArray(profile?.preferred_currency)
+        ? profile!.preferred_currency[0]
+        : profile!.preferred_currency!
+    }
+
+    return userProfile ?? null;
+  } catch (error) {
+    console.log("Error fetching user:", error);
     return Promise.reject();
   }
-
-  return profile;
 }
 
 export const UserService = {

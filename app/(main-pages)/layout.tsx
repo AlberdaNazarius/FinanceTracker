@@ -2,9 +2,15 @@ import React from 'react';
 import Header from '@/components/common/header/Header';
 import {UserService} from "@/service/user.service";
 import LoadUserToStore from "@/components/general/LoadUserToStore";
+import { redirect } from 'next/navigation';
+
 
 const Layout = async ({children}: { children: React.ReactNode }) => {
   const user = await UserService.getUserRequest();
+
+  if (!user) {
+    redirect('/login');
+  }
 
   return (
     <>

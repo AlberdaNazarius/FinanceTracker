@@ -11,8 +11,10 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/compo
 import {createClient} from "@/helpers/supabase/client";
 import {Formik} from 'formik';
 import {schema} from "./schema";
+import {useRouter} from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
   const supabase = createClient();
   const formInitState = {
     email: '',
@@ -27,6 +29,7 @@ export default function LoginPage() {
       email: values.email,
       password: values.password
     });
+    router.replace('/');
   }
 
   return (

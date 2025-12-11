@@ -9,8 +9,10 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {createClient} from "@/helpers/supabase/client";
 import {Formik} from 'formik';
 import {schema} from "./schema";
+import { useRouter } from 'next/navigation';
 
 export default function SignUpPage() {
+  const router = useRouter();
   const supabase = createClient();
   const formInitState = {
     username: '',
@@ -31,6 +33,7 @@ export default function SignUpPage() {
         }
       }
     });
+    router.replace('/');
   }
 
   return (
