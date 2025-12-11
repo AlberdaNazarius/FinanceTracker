@@ -55,7 +55,7 @@ export default function SignUpPage() {
             validationSchema={schema}
             onSubmit={handleSubmit}
           >
-            {({values, handleChange, handleSubmit, errors}) => (
+            {({values, handleChange, handleSubmit, touched, errors}) => (
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Full Name Input */}
                 <div className="space-y-2">
@@ -67,7 +67,7 @@ export default function SignUpPage() {
                     value={values.username}
                     onChange={handleChange}
                   />
-                  {errors.username && <p className="text-sm text-red-500 mt-1">{errors.username}</p>}
+                  {touched.username && errors.username && <p className="text-sm text-red-500 mt-1">{errors.username}</p>}
                 </div>
 
                 {/* Email Input */}
@@ -80,7 +80,7 @@ export default function SignUpPage() {
                     value={values.email}
                     onChange={handleChange}
                   />
-                  {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+                  {touched.email && errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
                 </div>
 
                 {/* Password Input */}
@@ -93,7 +93,7 @@ export default function SignUpPage() {
                     value={values.password}
                     onChange={handleChange}
                   />
-                  {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
+                  {touched.password && errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
                 </div>
 
                 {/* Confirm Password Input */}
@@ -106,7 +106,7 @@ export default function SignUpPage() {
                     value={values.confirm_password}
                     onChange={handleChange}
                   />
-                  {errors.confirm_password && <p className="text-sm text-red-500 mt-1">{errors.confirm_password}</p>}
+                  {touched.confirm_password && errors.confirm_password && <p className="text-sm text-red-500 mt-1">{errors.confirm_password}</p>}
                 </div>
 
                 {/* Submit Button */}

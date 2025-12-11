@@ -70,7 +70,7 @@ const AddTransactionBtn: React.FC = () => {
           validationSchema={transactionSchema}
           onSubmit={handleSubmit}
         >
-          {({values, handleChange, handleSubmit, setFieldValue, errors}) => (
+          {({values, handleChange, handleSubmit, setFieldValue, touched, errors}) => (
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <div className="space-y-2">
                 <Label htmlFor="amount">Amount</Label>
@@ -84,7 +84,7 @@ const AddTransactionBtn: React.FC = () => {
                     value={values.amount}
                     onChange={handleChange}
                   />
-                {errors.amount && <p className="text-sm text-red-500 mt-1">{errors.amount}</p>}
+                {touched.amount && errors.amount && <p className="text-sm text-red-500 mt-1">{errors.amount}</p>}
                 </div>
               </div>
 
@@ -103,7 +103,7 @@ const AddTransactionBtn: React.FC = () => {
                     <SelectItem value={TransactionType.INCOME}>Income</SelectItem>
                   </SelectContent>
                 </Select>
-                {errors.type && <p className="text-sm text-red-500 mt-1">{errors.type}</p>}
+                {touched.type && errors.type && <p className="text-sm text-red-500 mt-1">{errors.type}</p>}
               </div>
 
               <div className="space-y-2">
@@ -125,7 +125,7 @@ const AddTransactionBtn: React.FC = () => {
                     ))}
                   </SelectContent>
                 </Select>
-                {errors.category_id && <p className="text-sm text-red-500 mt-1">{errors.category_id}</p>}
+                {touched.category_id && errors.category_id && <p className="text-sm text-red-500 mt-1">{errors.category_id}</p>}
               </div>
 
               <div className="space-y-2">
@@ -136,7 +136,7 @@ const AddTransactionBtn: React.FC = () => {
                   value={values.description}
                   onChange={handleChange}
                 />
-                {errors.description && <p className="text-sm text-red-500 mt-1">{errors.description}</p>}
+                {touched.description && errors.description && <p className="text-sm text-red-500 mt-1">{errors.description}</p>}
               </div>
 
               <div className="space-y-2">
@@ -148,7 +148,7 @@ const AddTransactionBtn: React.FC = () => {
                   onChange={handleChange}
                 />
               </div>
-              {errors.currency_id && <p className="text-sm text-red-500 mt-1">{errors.currency_id}</p>}
+              {touched.currency_id && errors.currency_id && <p className="text-sm text-red-500 mt-1">{errors.currency_id}</p>}
 
               <div className="flex gap-3 pt-2">
                 <DialogClose className="flex-1 cursor-pointer">

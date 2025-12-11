@@ -56,7 +56,7 @@ export default function LoginPage() {
             validationSchema={schema}
             onSubmit={handleSubmit}
           >
-            {({values, handleChange, handleSubmit, errors}) => (
+            {({values, handleChange, handleSubmit, errors, touched}) => (
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
                   <Label className='font-semibold' htmlFor="email">Email</Label>
@@ -67,7 +67,7 @@ export default function LoginPage() {
                     value={values.email}
                     onChange={handleChange}
                   />
-                  {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+                  {touched.email && errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -84,7 +84,7 @@ export default function LoginPage() {
                     value={values.password}
                     onChange={handleChange}
                   />
-                  {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
+                  {touched.password && errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
                 </div>
 
                 {/* Submit Button */}
