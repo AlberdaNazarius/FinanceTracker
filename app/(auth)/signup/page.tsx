@@ -1,18 +1,36 @@
 "use client"
 
-import type React from "react"
-
 import {CircleDollarSign} from "lucide-react"
 import Link from "next/link"
 import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
 import {Label} from "@/components/ui/label"
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
+import {createClient} from "@/helpers/supabase/client";
+import {Formik} from 'formik';
+import {schema} from "./schema";
 
 export default function SignUpPage() {
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    console.log("Sign up submitted")
+  const supabase = createClient();
+  const formInitState = {
+    username: '',
+    email: '',
+    password: '',
+    confirm_password: '',
+  };
+
+  const handleSubmit = async (values: { username: string, email: string, password: string, confirm_password: string }) => {
+    // console.log("Sign in form values", values)
+    if (!values) return;
+    await supabase.auth.signUp({
+      email: values.email,
+      password: values.password,
+      options: {
+        data: {
+          username: values.username
+        }
+      }
+    });
   }
 
   return (
@@ -22,7 +40,7 @@ export default function SignUpPage() {
         <Link href="/" className="flex items-center gap-3">
           <div
             className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
-            <CircleDollarSign className='h-7 w-7 text-primary-foreground' />
+            <CircleDollarSign className='h-7 w-7 text-primary-foreground'/>
           </div>
           <span
             className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
@@ -37,36 +55,72 @@ export default function SignUpPage() {
           <CardTitle className="text-2xl font-bold">Create an account</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Full Name Input */}
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input type="text" id="name" placeholder="John Doe" required/>
-            </div>
+          <Formik
+            initialValues={formInitState}
+            validationSchema={schema}
+            onSubmit={handleSubmit}
+          >
+            {({values, handleChange, handleSubmit, errors}) => (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Full Name Input */}
+                <div className="space-y-2">
+                  <Label className='font-semibold' htmlFor="username">Full Name</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    placeholder="John Doe"
+                    value={values.username}
+                    onChange={handleChange}
+                  />
+                  {errors.username && <p className="text-sm text-red-500 mt-1">{errors.username}</p>}
+                </div>
 
-            {/* Email Input */}
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input type="email" id="email" placeholder="you@example.com" required/>
-            </div>
+                {/* Email Input */}
+                <div className="space-y-2">
+                  <Label className='font-semibold' htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={values.email}
+                    onChange={handleChange}
+                  />
+                  {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+                </div>
 
-            {/* Password Input */}
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input type="password" id="password" placeholder="Create a strong password" required/>
-            </div>
+                {/* Password Input */}
+                <div className="space-y-2">
+                  <Label className='font-semibold' htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Create a strong password"
+                    value={values.password}
+                    onChange={handleChange}
+                  />
+                  {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
+                </div>
 
-            {/* Confirm Password Input */}
-            <div className="space-y-2">
-              <Label htmlFor="confirm-password">Confirm Password</Label>
-              <Input type="password" id="confirm-password" placeholder="Confirm your password" required/>
-            </div>
+                {/* Confirm Password Input */}
+                <div className="space-y-2">
+                  <Label className='font-semibold' htmlFor="confirm_password">Confirm Password</Label>
+                  <Input
+                    id="confirm_password"
+                    type="password"
+                    placeholder="Confirm your password"
+                    value={values.confirm_password}
+                    onChange={handleChange}
+                  />
+                  {errors.confirm_password && <p className="text-sm text-red-500 mt-1">{errors.confirm_password}</p>}
+                </div>
 
-            {/* Submit Button */}
-            <Button type="submit" className="w-full cursor-pointer">
-              Create account
-            </Button>
-          </form>
+                {/* Submit Button */}
+                <Button type="submit" className="w-full cursor-pointer">
+                  Create account
+                </Button>
+              </form>
+            )}
+          </Formik>
 
           {/* Divider */}
           <div className="relative my-6">
