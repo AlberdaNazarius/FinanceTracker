@@ -8,14 +8,13 @@ import {Button} from "@/components/ui/button"
 import {Input} from "@/components/ui/input"
 import {Label} from "@/components/ui/label"
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card"
-import {createClient} from "@/helpers/supabase/client";
 import {Formik} from 'formik';
 import {schema} from "./schema";
 import {useRouter} from "next/navigation";
+import {AuthService} from "@/service/auth.service";
 
 export default function LoginPage() {
   const router = useRouter();
-  const supabase = createClient();
   const formInitState = {
     email: '',
     password: '',
@@ -24,11 +23,7 @@ export default function LoginPage() {
   const handleSubmit = async (values: { email: string, password: string }) => {
     // console.log("Login submitted", values)
     if (!values) return;
-
-    await supabase.auth.signInWithPassword({
-      email: values.email,
-      password: values.password
-    });
+    await AuthService.login(values.email, values.password);
     router.replace('/');
   }
 

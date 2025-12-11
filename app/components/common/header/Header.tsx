@@ -4,6 +4,7 @@ import {useState} from "react"
 import {CircleDollarSign, User, Menu} from "lucide-react"
 import Link from "next/link"
 import useUserStore from "@/store/UserStore";
+import {AuthService} from "@/service/auth.service";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -44,6 +45,9 @@ export default function Header() {
               <div className="flex gap-1 items-center font-semibold justify-center">
                 <User className='h-5 w-5'/>
                 <span className="text-sm text-foreground">{user?.username}</span>
+                <button onClick={AuthService.logout}>
+                  Logout
+                </button>
               </div>
             ) : (
               <div>
