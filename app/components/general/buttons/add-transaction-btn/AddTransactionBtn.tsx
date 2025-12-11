@@ -29,9 +29,11 @@ const AddTransactionBtn: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
 
   const handleSubmit = async (values: RequestTransaction) => {
-    // console.log(values)
+    if (!values) return;
+
     const newTransaction: RequestTransaction = {
       ...values,
+      description: values.description ? values.description : 'General transaction',
       transaction_date: new Date(values.transaction_date)
     }
     await TransactionService.addTransaction(newTransaction);
@@ -39,6 +41,8 @@ const AddTransactionBtn: React.FC = () => {
   }
 
   useEffect(() => {
+    if(!open) return;
+    
     const fetchData = async () => {
       try {
         const response = await CategoryService.getCategories();
@@ -49,7 +53,7 @@ const AddTransactionBtn: React.FC = () => {
       }
     }
     fetchData();
-  }, []);
+  }, [open]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -140,11 +144,10 @@ const AddTransactionBtn: React.FC = () => {
                 <Input
                   id="transaction_date"
                   type="date"
-                  value={values?.transaction_date?.toString().split('T')[0]}
+                  value={values.transaction_date.toISOString().split('T')[0]}
                   onChange={handleChange}
                 />
               </div>
-
               {errors.currency_id && <p className="text-sm text-red-500 mt-1">{errors.currency_id}</p>}
 
               <div className="flex gap-3 pt-2">

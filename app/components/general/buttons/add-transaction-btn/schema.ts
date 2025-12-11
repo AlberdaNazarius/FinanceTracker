@@ -12,7 +12,7 @@ export const transactionSchema = yup.object({
     .number()
     .typeError("Amount must be a number")
     .required("Amount is required")
-    .min(0, "Amount must be non-negative"),
+    .min(0.01, "Must be at least 0.01"),
 
   currency_id: yup.string().required("Currency is required"),
   transaction_date: yup
