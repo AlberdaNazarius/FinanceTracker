@@ -2,6 +2,7 @@ import axios from "axios";
 import {cookies} from "next/headers";
 import {createClient} from "@/helpers/supabase/server";
 import {User} from "@/types/user";
+import {isDynamicServerError} from "next/dist/client/components/hooks-server-context";
 
 const getUser = async () => {
   const response = await axios.get("/api/user");
@@ -41,6 +42,10 @@ const getUserRequest = async (): Promise<User | null> => {
 
     return userProfile ?? null;
   } catch (error) {
+    if (isDynamicServerError(error)) {
+      throw error;
+    }
+
     console.log("Error fetching user:", error);
     return Promise.reject();
   }
