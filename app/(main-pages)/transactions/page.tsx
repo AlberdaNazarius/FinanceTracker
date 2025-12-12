@@ -9,6 +9,8 @@ const Transactions = () => {
   const [userTransactions, setUserTransactions] = useState<ResponseTransaction[]>([]);
 
   useEffect(() => {
+    if (userTransactions && userTransactions.length > 0) return;
+
     const fetchTransactions = async () => {
       try {
         const response = await TransactionService.getTransactions();
@@ -19,7 +21,7 @@ const Transactions = () => {
       }
     }
     fetchTransactions();
-  }, []);
+  }, [userTransactions]);
 
   return (
     <div className='border-1 rounded-2xl w-full self-start'>

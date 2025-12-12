@@ -1,57 +1,19 @@
 import axios from "axios";
-import {cookies} from "next/headers";
-import {createClient} from "@/helpers/supabase/server";
-import {User} from "@/types/user";
-import {isDynamicServerError} from "next/dist/client/components/hooks-server-context";
+import useUserStore from "@/store/UserStore";
+import {ApiRoutes} from "@/enum/api-routes";
 
 const getUser = async () => {
-  const response = await axios.get("/api/user");
+  const response = await axios.get(ApiRoutes.USER);
   return response.data;
 }
 
-const getUserRequest = async (): Promise<User | null> => {
-  try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
-    const {
-      data: {user: authUser},
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return null;
-    }
-
-    const {data: profile} = await supabase
-      .from("user")
-      .select(`
-        username,
-        balance,
-        preferred_currency:preferred_currency_id (*)
-      `)
-      .eq("id", authUser.id)
-      .single();
-
-    const userProfile: User = {
-      username: profile?.username,
-      balance: profile?.balance,
-      preferred_currency: Array.isArray(profile?.preferred_currency)
-        ? profile!.preferred_currency[0]
-        : profile!.preferred_currency!
-    }
-
-    return userProfile ?? null;
-  } catch (error) {
-    if (isDynamicServerError(error)) {
-      throw error;
-    }
-
-    console.log("Error fetching user:", error);
-    return Promise.reject();
-  }
+async function refreshUser() {
+  const res = await fetch(ApiRoutes.USER);
+  const updatedUser = await res.json();
+  useUserStore.getState().setUser(updatedUser);
 }
 
 export const UserService = {
   getUser,
-  getUserRequest
+  refreshUser,
 }

@@ -14,9 +14,13 @@ import {CategoryService} from "@/service/category.service";
 import {Category} from "@/types/category";
 import {CURRENCIES} from "@/helpers/constants";
 import {RequestTransaction} from "@/types/request/request_transaction";
+import useUserStore from "@/store/UserStore";
+import {UserService} from "@/service/user.service";
 
 const AddTransactionBtn: React.FC = () => {
+  const {updateBalance} = useUserStore();
   const [open, setOpen] = useState(false);
+
   const formInitState: RequestTransaction = {
     category_id: null,
     currency_id: CURRENCIES[0].id,
@@ -31,13 +35,16 @@ const AddTransactionBtn: React.FC = () => {
   const handleSubmit = async (values: RequestTransaction) => {
     if (!values) return;
 
+    updateBalance(values.amount, values.type);
+    setOpen(false);
+
     const newTransaction: RequestTransaction = {
       ...values,
       description: values.description ? values.description : 'General transaction',
       transaction_date: new Date(values.transaction_date)
     }
     await TransactionService.addTransaction(newTransaction);
-    setOpen(false);
+    await UserService.refreshUser();
   }
 
   useEffect(() => {

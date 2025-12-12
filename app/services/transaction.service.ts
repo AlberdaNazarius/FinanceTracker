@@ -1,14 +1,14 @@
 import axios from "axios";
 import {RequestTransaction} from "@/types/request/request_transaction";
+import {ApiRoutes} from "@/enum/api-routes";
 
-// Testing API integration for transactions
 const getTransactions = async () => {
-  const response = await axios.get("/api/transactions");
+  const response = await axios.get(ApiRoutes.TRANSACTIONS);
   return response.data;
 }
 
 const addTransaction = async (transactionData: RequestTransaction) => {
-  await axios.post("/api/transactions", transactionData);
+  await axios.post(ApiRoutes.TRANSACTIONS, transactionData);
 }
 
 export const TransactionService = {

@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import {DEFAULT_CURRENCY} from "@/helpers/constants";
 
 export const formatDate = (dateString: Date | null): string => {
   if (!dateString) return 'Unknown';
@@ -22,10 +23,13 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 
-export const formatMoney = (amount: number | null, code: string | null) => {
-  if (amount === null || code === null) return 'N/A';
+export const formatMoney = (amount: number | null | undefined, code: string | null | undefined) => {
+  if (!amount && amount !== 0) return 'N/A';
+
   return new Intl.NumberFormat("en", {
     style: "currency",
-    currency: code,
+    currency: code ?? DEFAULT_CURRENCY.code,
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2
   }).format(amount);
 }

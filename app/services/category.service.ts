@@ -1,7 +1,8 @@
 import axios from "axios";
+import {ApiRoutes} from "@/enum/api-routes";
 
 const getCategories = async () => {
-  const response = await axios.get("/api/category");
+  const response = await axios.get(ApiRoutes.CATEGORY);
   return response.data;
 }
 
