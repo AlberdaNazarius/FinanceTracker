@@ -1,98 +1,16 @@
-import {ResponseTransaction} from "@/types/response/response_transaction";
-import {TransactionType} from "@/enum/transaction-type";
 import {Category} from "@/types/category";
 
-// export const TRANSACTIONS: ResponseTransaction[] = [
-//   {
-//     id: 1,
-//     type: TransactionType.EXPENSE,
-//     description: 'Grocery Shopping',
-//     category: {
-//       id: 'fdsfd',
-//       name: 'Food',
-//       description: 'Expenses for food and groceries',
-//     },
-//     transaction_date: new Date(),
-//     amount: 75.50,
-//     currency: {
-//       id: 2,
-//       code: 'USD',
-//       unit_text: 'Dollar',
-//     }
-//   },
-//   {
-//     id: 2,
-//     type: TransactionType.EXPENSE,
-//     description: 'Electricity Bill',
-//     category: {
-//       id: 'fasfds',
-//       name: 'Bills',
-//       description: 'Monthly utility bills',
-//     },
-//     transaction_date: new Date(),
-//     amount: 120.00,
-//     currency: {
-//       id: 'fasfds',
-//       code: 'USD',
-//       unit_text: 'Dollar',
-//     }
-//   },
-//   {
-//     id: 3,
-//     type: TransactionType.EXPENSE,
-//     description: 'Gym Membership',
-//     category: {
-//       id: 'fasfds',
-//       name: 'Healthcare',
-//       description: 'Health and fitness expenses',
-//     },
-//     transaction_date: new Date(),
-//     amount: 45.00,
-//     currency: {
-//       id: 'fasfds',
-//       code: 'USD',
-//       unit_text: 'Dollar',
-//     }
-//   },
-// ];
+export const CATEGORIES: Category[] =
+  [
+    { id: "1", name: "Salary", type: "income", color: "#10b981", icon: "💰" },
+    { id: "2", name: "Freelance", type: "income", color: "#3b82f6", icon: "💼" },
+    { id: "3", name: "Investment", type: "income", color: "#8b5cf6", icon: "📈" },
+    { id: "4", name: "Food", type: "expense", color: "#ef4444", icon: "🍔" },
+    { id: "5", name: "Transport", type: "expense", color: "#f59e0b", icon: "🚗" },
+    { id: "6", name: "Shopping", type: "expense", color: "#ec4899", icon: "🛍️" },
+    { id: "7", name: "Bills", type: "expense", color: "#6366f1", icon: "📄" },
+  ];
 
-// export let incomeCategories: Category[] = [
-//   {
-//     name: "Salary",
-//     description: "Monthly salary from employer",
-//   },
-//   {
-//     name: "Freelancing",
-//     description: "Income from freelance projects",
-//   },
-//   {
-//     name: "Investments",
-//     description: "Earnings from investments",
-//   },
-//   {
-//     name: "Gifts",
-//     description: "Monetary gifts received",
-//   }
-// ]
-// export const CATEGORIES: Category[] = [
-//   {
-//     name: "Income",
-//     description: "Sources of income",
-//   },
-//   {
-//     name: "Food",
-//     description: "Expenses for food and groceries",
-//   },
-//   {
-//     name: "Transportation",
-//     description: "Costs for public transport and fuel",
-//   },
-//   {
-//     name: "Utilities",
-//     description: "Monthly utility bills",
-//   },
-//   {
-//     name: "Entertainment",
-//     description: "Expenses for movies, events, etc.",
-//   }
-// ]
+export const COLOR_OPTIONS = ["#ef4444", "#f59e0b", "#10b981", "#3b82f6", "#6366f1", "#8b5cf6", "#ec4899", "#f43f5e"]
+
+export const ICON_OPTIONS = ["💰", "💼", "📈", "🍔", "🚗", "🛍️", "📄", "🏠", "💊", "🎮", "✈️", "📚"]

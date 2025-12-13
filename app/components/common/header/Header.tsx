@@ -47,10 +47,10 @@ export default function Header() {
               Transactions
             </Link>
             <Link
-              href={Routes.BUDGET}
+              href={Routes.CATEGORIES}
               className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
             >
-              Budgets
+              Categories
             </Link>
           </nav>
 
@@ -101,7 +101,7 @@ export default function Header() {
             <Link href={Routes.TRANSACTIONS} className="text-sm font-medium text-muted">
               Transactions
             </Link>
-            <Link href={Routes.BUDGET} className="text-sm font-medium text-muted">
+            <Link href={Routes.CATEGORIES} className="text-sm font-medium text-muted">
               Budgets
             </Link>
           </nav>
