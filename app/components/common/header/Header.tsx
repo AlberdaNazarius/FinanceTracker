@@ -6,10 +6,24 @@ import Link from "next/link"
 import useUserStore from "@/store/UserStore";
 import {AuthService} from "@/service/auth.service";
 import {Routes} from "@/enum/routes";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {Button} from "@/components/ui/button";
+import {useRouter} from "next/navigation";
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const {user} = useUserStore();
+  const router = useRouter();
+
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  const handleLogout = async () => {
+    await AuthService.logout();
+    router.replace(Routes.LOGIN);
+  }
 
   return (
     <header className="border-b border-border bg-card">
@@ -23,17 +37,17 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="/" className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
+            <Link href={Routes.HOME} className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
               Dashboard
             </Link>
             <Link
-              href="/transactions"
+              href={Routes.TRANSACTIONS}
               className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
             >
               Transactions
             </Link>
             <Link
-              href="/budget"
+              href={Routes.BUDGET}
               className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
             >
               Budgets
@@ -43,17 +57,25 @@ export default function Header() {
           {/* User Menu */}
           <div className="flex items-center gap-3">
             {user ? (
-              <div className="flex gap-1 items-center font-semibold justify-center">
-                <User className='h-5 w-5'/>
-                <span className="text-sm text-foreground">{user?.username}</span>
-                <button className='text-sm text-foreground ml-2 cursor-pointer' onClick={AuthService.logout}>
-                  Logout
-                </button>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className="flex gap-1 items-center font-semibold justify-center cursor-pointer text-foreground hover:text-primary transition-colors">
+                    <User className='h-5 w-5'/>
+                    <span className="text-sm">{user?.username}</span>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-32 flex flex-col items-center justify-center">
+                  <Button className='text-sm text-foreground cursor-pointer w-full' variant='ghost'
+                          onClick={handleLogout}>
+                    Logout
+                  </Button>
+                </DropdownMenuContent>
+              </DropdownMenu>
             ) : (
               <div>
                 <Link
-                  href="/login"
+                  href={Routes.LOGIN}
                   className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
                 >
                   Login

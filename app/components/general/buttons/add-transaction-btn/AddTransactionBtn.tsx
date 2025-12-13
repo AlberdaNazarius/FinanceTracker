@@ -16,10 +16,13 @@ import {CURRENCIES} from "@/helpers/constants";
 import {RequestTransaction} from "@/types/request/request_transaction";
 import useUserStore from "@/store/UserStore";
 import {UserService} from "@/service/user.service";
+import {getCurrencySymbol} from "@/helpers/utils";
 
 const AddTransactionBtn: React.FC = () => {
   const {updateBalance} = useUserStore();
-  const [open, setOpen] = useState(false);
+  const currencySymbol = useUserStore(state =>
+    getCurrencySymbol(state.user?.preferred_currency?.code)
+  );
 
   const formInitState: RequestTransaction = {
     category_id: null,
@@ -30,6 +33,7 @@ const AddTransactionBtn: React.FC = () => {
     transaction_date: new Date(),
   }
 
+  const [open, setOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
 
   const handleSubmit = async (values: RequestTransaction) => {
@@ -82,7 +86,7 @@ const AddTransactionBtn: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="amount">Amount</Label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1.5 text-muted-foreground">$</span>
+                  <span className="absolute left-3 top-1.5 text-muted-foreground">{currencySymbol}</span>
                   <Input
                     id="amount"
                     type="number"

@@ -1,5 +1,5 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import {clsx, type ClassValue} from "clsx"
+import {twMerge} from "tailwind-merge"
 import {DEFAULT_CURRENCY} from "@/helpers/constants";
 
 export const formatDate = (dateString: Date | null): string => {
@@ -32,4 +32,17 @@ export const formatMoney = (amount: number | null | undefined, code: string | nu
     maximumFractionDigits: 2,
     minimumFractionDigits: 2
   }).format(amount);
+}
+
+export const getCurrencySymbol = (currencyCode: string | undefined) => {
+  const code = currencyCode ?? DEFAULT_CURRENCY.code;
+
+    const parts = new Intl.NumberFormat("en", {
+    style: "currency",
+    currency: code,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+  }).formatToParts(0);
+  const symbolPart = parts.find(part => part.type === "currency");
+  return symbolPart ? symbolPart.value : code;
 }
