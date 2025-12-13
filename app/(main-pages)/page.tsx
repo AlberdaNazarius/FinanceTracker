@@ -1,7 +1,7 @@
 'use client';
 
 import BalanceCard from "@/components/general/balance-card/BalanceCard";
-import AddTransactionBtn from "@/components/general/buttons/add-transaction-btn/AddTransactionBtn";
+import AddTransactionModal from "@/components/dialogs/add-transaction-modal/AddTransactionModal";
 import useUserStore from "@/store/UserStore";
 
 const Home = () => {
@@ -16,7 +16,7 @@ const Home = () => {
       {/*  <BalanceCard title='Expenses' amount={32}/>*/}
       {/*  <BalanceCard title='Income' amount={43}/>*/}
       {/*</div>*/}
-      <AddTransactionBtn/>
+      <AddTransactionModal/>
     </div>
   );
 }

@@ -9,7 +9,7 @@ import {Button} from "@/components/ui/button"
 import {TransactionType} from "@/enum/transaction-type";
 import {TransactionService} from "@/service/transaction.service";
 import {Formik} from 'formik';
-import {transactionSchema} from "@/components/general/buttons/add-transaction-btn/schema";
+import {transactionSchema} from "@/components/dialogs/add-transaction-modal/schema";
 import {CategoryService} from "@/service/category.service";
 import {Category} from "@/types/category";
 import {CURRENCIES} from "@/helpers/constants";
@@ -18,7 +18,7 @@ import useUserStore from "@/store/UserStore";
 import {UserService} from "@/service/user.service";
 import {getCurrencySymbol} from "@/helpers/utils";
 
-const AddTransactionBtn: React.FC = () => {
+const AddTransactionModal: React.FC = () => {
   const {updateBalance} = useUserStore();
   const currencySymbol = useUserStore(state =>
     getCurrencySymbol(state.user?.preferred_currency?.code)
@@ -177,4 +177,4 @@ const AddTransactionBtn: React.FC = () => {
   );
 }
 
-export default AddTransactionBtn;
+export default AddTransactionModal;
