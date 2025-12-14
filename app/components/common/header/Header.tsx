@@ -65,8 +65,8 @@ export default function Header() {
                     <span className="text-sm">{user?.username}</span>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-32 flex flex-col items-center justify-center">
-                  <Button className='text-sm text-foreground cursor-pointer w-full' variant='ghost'
+                <DropdownMenuContent className="w-24 flex flex-col items-center justify-center">
+                  <Button size='sm' className='text-sm text-foreground cursor-pointer w-full' variant='ghost'
                           onClick={handleLogout}>
                     Logout
                   </Button>

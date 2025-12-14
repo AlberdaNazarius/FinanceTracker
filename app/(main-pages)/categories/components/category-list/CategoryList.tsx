@@ -37,25 +37,27 @@ const CategoryList: React.FC<Props> = (
           >
             <div className="flex items-center gap-3">
               <div
-                className="flex h-10 w-10 items-center justify-center rounded-full text-xl"
+                className="flex h-10 w-10 items-center justify-center rounded-full text-xl pb-1"
                 style={{backgroundColor: `${category.color}20`}}
               >
                 {category.icon}
               </div>
               <div>
-                <p className="font-medium">{category.name}</p>
+                <p className="font-semibold">{category.name}</p>
                 <p className="text-xs text-muted">{type}</p>
               </div>
             </div>
 
             <div className="flex gap-2 text-muted">
               <button
+                type='button'
                 className='rounded-md p-2 hover:bg-background hover:text-foreground transition-colors cursor-pointer'
                 onClick={() => onEdit(category)}
               >
                 <SquarePen className="h-4 w-4"/>
               </button>
               <button
+                type='button'
                 className='rounded-md p-2 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer'
                 onClick={() => onDelete(category.id)}
               >
