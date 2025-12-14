@@ -1,6 +1,6 @@
 import React from 'react';
-import Header from '@/components/common/header/Header';
-import LoadUserToStore from "@/components/general/LoadUserToStore";
+import Header from '@/components/common/header/header';
+import LoadUserToStore from "@/components/general/load-user-to-store/load-user-to-store";
 import { redirect } from 'next/navigation';
 import {Routes} from "@/enum/routes";
 import {UserServerService} from "@/service/server/user.service";

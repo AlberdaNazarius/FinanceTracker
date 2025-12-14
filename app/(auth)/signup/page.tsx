@@ -9,7 +9,7 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {Formik} from 'formik';
 import {schema} from "./schema";
 import { useRouter } from 'next/navigation';
-import {AuthService} from "@/service/auth.service";
+import {AuthService} from "@/service/client/auth.service";
 import {Routes} from "@/enum/routes";
 
 export default function SignUpPage() {

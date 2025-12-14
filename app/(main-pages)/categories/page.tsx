@@ -2,9 +2,9 @@
 
 import {useCallback, useEffect, useMemo, useState} from "react"
 import {Category} from "@/types/category";
-import AddCategoryModal from "./dialogs/add-category-modal/AddCategoryModal";
-import {CategoryService} from "@/service/category.service";
-import CategoryList from "./components/category-list/CategoryList";
+import AddCategoryDialog from "./dialogs/add-category-dialog/add-category-dialog";
+import {CategoryService} from "@/service/client/category.service";
+import CategoryList from "./components/category-list/category-list";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -95,7 +95,7 @@ export default function CategoriesPage() {
 
   /** ---------------- Render ---------------- */
   if (isLoading) {
-    return <p className="text-muted">Loading categories…</p>
+    return <p className="text-muted font-semibold">Loading categories…</p>
   }
 
   if (error) {
@@ -107,7 +107,7 @@ export default function CategoriesPage() {
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Categories</h1>
-          <p className="text-sm text-muted mt-1">Manage your income and expense categories</p>
+          <p className="text-sm text-muted font-semibold mt-1">Manage your income and expense categories</p>
         </div>
         <button
           onClick={handleAddNew}
@@ -140,7 +140,7 @@ export default function CategoriesPage() {
       </div>
 
       {isDialogOpen && (
-        <AddCategoryModal
+        <AddCategoryDialog
           category={editingCategory}
           onClose={() => setIsDialogOpen(false)}
           onSave={handleSave}

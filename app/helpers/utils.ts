@@ -22,7 +22,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-
 export const formatMoney = (amount: number | null | undefined, code: string | null | undefined) => {
   if (!amount && amount !== 0) return 'N/A';
 

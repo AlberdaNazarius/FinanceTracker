@@ -14,7 +14,7 @@ type Props = {
   onSave: (values: Category) => Promise<void> | void
 }
 
-const AddCategoryModal: React.FC<Props> = (
+const AddCategoryDialog: React.FC<Props> = (
   {
     category,
     onClose,
@@ -194,4 +194,4 @@ const AddCategoryModal: React.FC<Props> = (
   )
 }
 
-export default AddCategoryModal
+export default AddCategoryDialog

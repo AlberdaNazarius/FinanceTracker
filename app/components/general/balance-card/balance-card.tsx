@@ -2,7 +2,7 @@
 
 import React from 'react';
 import {cn, formatMoney} from "@/helpers/utils";
-import useUserStore from "@/store/UserStore";
+import useUserStore from "@/store/user-store";
 
 type BalanceCardProps = {
   amount: number;

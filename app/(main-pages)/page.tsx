@@ -1,8 +1,8 @@
 'use client';
 
-import BalanceCard from "@/components/general/balance-card/BalanceCard";
-import AddTransactionModal from "./transactions/dialogs/add-transaction-modal/AddTransactionModal";
-import useUserStore from "@/store/UserStore";
+import BalanceCard from "@/components/general/balance-card/balance-card";
+import AddTransactionDialog from "./transactions/dialogs/add-transaction-dialog/add-transaction-dialog";
+import useUserStore from "@/store/user-store";
 
 const Home = () => {
   const user = useUserStore(state => state.user);
@@ -16,7 +16,7 @@ const Home = () => {
       {/*  <BalanceCard title='Expenses' amount={32}/>*/}
       {/*  <BalanceCard title='Income' amount={43}/>*/}
       {/*</div>*/}
-      <AddTransactionModal/>
+      <AddTransactionDialog/>
     </div>
   );
 }

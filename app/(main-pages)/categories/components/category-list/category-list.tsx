@@ -26,7 +26,7 @@ const CategoryList: React.FC<Props> = (
       <h2 className="mb-4 text-lg font-semibold flex items-center gap-2">
         <span className={color}>{icon}</span>
         <span>{title}</span>
-        <span className="text-xs text-muted">({categories.length})</span>
+        <span className="text-xs text-muted font-semibold">({categories.length})</span>
       </h2>
 
       <div className="space-y-2">
@@ -44,7 +44,7 @@ const CategoryList: React.FC<Props> = (
               </div>
               <div>
                 <p className="font-semibold">{category.name}</p>
-                <p className="text-xs text-muted">{type}</p>
+                <p className="text-xs text-muted font-semibold">{type}</p>
               </div>
             </div>
 

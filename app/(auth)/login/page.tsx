@@ -11,7 +11,7 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/compo
 import {Formik} from 'formik';
 import {schema} from "./schema";
 import {useRouter} from "next/navigation";
-import {AuthService} from "@/service/auth.service";
+import {AuthService} from "@/service/client/auth.service";
 import {Routes} from "@/enum/routes";
 
 export default function LoginPage() {

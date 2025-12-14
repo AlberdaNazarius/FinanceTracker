@@ -1,5 +1,5 @@
 import axios from "axios";
-import useUserStore from "@/store/UserStore";
+import useUserStore from "@/store/user-store";
 import {ApiRoutes} from "@/enum/api-routes";
 
 const getUser = async () => {

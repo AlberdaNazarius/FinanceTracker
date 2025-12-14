@@ -1,5 +1,5 @@
 import axios from "axios";
-import {RequestTransaction} from "@/types/request/request_transaction";
+import {RequestTransaction} from "@/types/request/request-transaction";
 import {ApiRoutes} from "@/enum/api-routes";
 
 const getTransactions = async () => {

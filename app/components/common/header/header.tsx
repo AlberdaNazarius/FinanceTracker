@@ -3,8 +3,8 @@
 import {useState} from "react"
 import {CircleDollarSign, User, Menu} from "lucide-react"
 import Link from "next/link"
-import useUserStore from "@/store/UserStore";
-import {AuthService} from "@/service/auth.service";
+import useUserStore from "@/store/user-store";
+import {AuthService} from "@/service/client/auth.service";
 import {Routes} from "@/enum/routes";
 import {
   DropdownMenu,
