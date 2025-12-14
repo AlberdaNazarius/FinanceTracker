@@ -9,7 +9,7 @@ import {Button} from "@/components/ui/button"
 import {TransactionType} from "@/enum/transaction-type";
 import {TransactionService} from "@/service/transaction.service";
 import {Formik} from 'formik';
-import {transactionSchema} from "@/components/dialogs/add-transaction-modal/schema";
+import {transactionSchema} from "./schema";
 import {CategoryService} from "@/service/category.service";
 import {Category} from "@/types/category";
 import {CURRENCIES} from "@/helpers/constants";

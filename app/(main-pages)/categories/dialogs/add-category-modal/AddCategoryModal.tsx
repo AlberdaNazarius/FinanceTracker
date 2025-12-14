@@ -3,9 +3,10 @@
 import React, {useCallback, useEffect, useMemo} from "react"
 import {Formik} from "formik"
 import {Category, CategoryCreate} from "@/types/category"
-import {COLOR_OPTIONS, ICON_OPTIONS} from "@/helpers/data"
+import {COLOR_OPTIONS, ICON_OPTIONS} from "@/helpers/constants"
 import {Button} from "@/components/ui/button"
 import {schema} from "./schema"
+import {TransactionType} from "@/enum/transaction-type";
 
 type Props = {
   category: Category | null
@@ -23,7 +24,7 @@ const AddCategoryModal: React.FC<Props> = (
   const initialValues = useMemo<CategoryCreate>(
     () => ({
       name: category?.name ?? "",
-      type: category?.type ?? "expense",
+      type: category?.type ?? TransactionType.EXPENSE,
       color: category?.color ?? "#3b82f6",
       icon: category?.icon ?? "📁",
     }),
@@ -102,7 +103,7 @@ const AddCategoryModal: React.FC<Props> = (
               <div className="space-y-2">
                 <label className="text-sm font-medium">Type</label>
                 <div className="flex gap-2">
-                  {(["income", "expense"] as const).map(type => (
+                  {([TransactionType.INCOME, TransactionType.EXPENSE] as const).map(type => (
                     <button
                       key={type}
                       type="button"
@@ -113,7 +114,7 @@ const AddCategoryModal: React.FC<Props> = (
                           : "border-border hover:bg-accent"
                       }`}
                     >
-                      {type === "income" ? "Income" : "Expense"}
+                      {type === TransactionType.INCOME ? "Income" : "Expense"}
                     </button>
                   ))}
                 </div>

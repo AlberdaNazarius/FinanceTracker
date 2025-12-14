@@ -2,7 +2,7 @@
 
 import {useCallback, useEffect, useMemo, useState} from "react"
 import {Category} from "@/types/category";
-import AddCategoryModal from "@/components/dialogs/add-category-modal/AddCategoryModal";
+import AddCategoryModal from "./dialogs/add-category-modal/AddCategoryModal";
 import {CategoryService} from "@/service/category.service";
 import CategoryList from "./components/category-list/CategoryList";
 

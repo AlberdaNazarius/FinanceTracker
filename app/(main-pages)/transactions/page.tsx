@@ -14,7 +14,6 @@ const Transactions = () => {
     const fetchTransactions = async () => {
       try {
         const response = await TransactionService.getTransactions();
-        console.log("Fetched transactions:", response);
         setUserTransactions(response.data);
       } catch (error) {
         console.error("Error fetching transactions:", error);

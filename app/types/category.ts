@@ -1,7 +1,9 @@
+import {TransactionType} from "@/enum/transaction-type";
+
 export type Category = {
   id: string;
   name: string;
-  type: 'income' | 'expense';
+  type: TransactionType;
   color: string
   icon: string
 }

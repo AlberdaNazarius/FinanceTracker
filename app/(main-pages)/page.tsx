@@ -1,7 +1,7 @@
 'use client';
 
 import BalanceCard from "@/components/general/balance-card/BalanceCard";
-import AddTransactionModal from "@/components/dialogs/add-transaction-modal/AddTransactionModal";
+import AddTransactionModal from "./transactions/dialogs/add-transaction-modal/AddTransactionModal";
 import useUserStore from "@/store/UserStore";
 
 const Home = () => {
