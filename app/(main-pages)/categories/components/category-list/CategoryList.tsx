@@ -1,5 +1,6 @@
 import {Category} from "@/types/category"
 import React from "react";
+import {SquarePen, Trash2} from "lucide-react";
 
 type Props = {
   title: string
@@ -47,9 +48,19 @@ const CategoryList: React.FC<Props> = (
               </div>
             </div>
 
-            <div className="flex gap-2">
-              <button onClick={() => onEdit(category)}>✏️</button>
-              <button onClick={() => onDelete(category.id)}>🗑</button>
+            <div className="flex gap-2 text-muted">
+              <button
+                className='rounded-md p-2 hover:bg-background hover:text-foreground transition-colors cursor-pointer'
+                onClick={() => onEdit(category)}
+              >
+                <SquarePen className="h-4 w-4"/>
+              </button>
+              <button
+                className='rounded-md p-2 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer'
+                onClick={() => onDelete(category.id)}
+              >
+                <Trash2 className="h-4 w-4"/>
+              </button>
             </div>
           </div>
         ))}

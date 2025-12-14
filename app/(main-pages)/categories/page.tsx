@@ -85,7 +85,6 @@ export default function CategoriesPage() {
       setCategories(prev => [...prev, optimisticCategory]);
       const { data } = await CategoryService.addCategory(categoryBody);
 
-      // replace temp id
       setCategories(prev =>
         prev.map(c => (c.id === tempId ? data : c))
       );
