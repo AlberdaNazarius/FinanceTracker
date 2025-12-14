@@ -1,33 +1,107 @@
 "use client"
 
-import {useState} from "react"
+import {useCallback, useEffect, useMemo, useState} from "react"
 import {Category} from "@/types/category";
-import {CATEGORIES} from "@/helpers/data";
 import AddCategoryModal from "@/components/dialogs/add-category-modal/AddCategoryModal";
-
+import {CategoryService} from "@/service/category.service";
+import CategoryList from "./components/category-list/CategoryList";
 
 export default function CategoriesPage() {
-  const [categories, setCategories] = useState<Category[]>(CATEGORIES)
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const [isDialogOpen, setIsDialogOpen] = useState(false)
-  const [editingCategory, setEditingCategory] = useState<Category | null>(null)
+  /** ---------------- Fetch ---------------- */
+  useEffect(() => {
+    let mounted = true;
+
+    async function fetchCategories() {
+      try {
+        const { data } = await CategoryService.getCategories();
+        if (mounted) setCategories(data);
+      } catch (err) {
+        console.error(err)
+        setError("Failed to load categories");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchCategories();
+    return () => {
+      mounted = false
+    };
+  }, [])
+
+  /** ---------------- Derived data ---------------- */
+  const incomeCategories = useMemo(
+    () => categories.filter(c => c.type === "income"),
+    [categories]
+  )
+
+  const expenseCategories = useMemo(
+    () => categories.filter(c => c.type === "expense"),
+    [categories]
+  )
+
+  /** ---------------- Handlers ---------------- */
+  const handleAddNew = () => {
+    setEditingCategory(null)
+    setIsDialogOpen(true)
+  }
 
   const handleEdit = (category: Category) => {
     setEditingCategory(category)
     setIsDialogOpen(true)
   }
 
-  const handleDelete = (id: string) => {
-    setCategories(categories.filter((cat) => cat.id !== id))
+  const handleDelete = useCallback(async (id: string) => {
+    const prev = categories;
+    setCategories(prev.filter(c => c.id !== id));
+
+    try {
+      await CategoryService.deleteCategory(id)
+    } catch (err) {
+      console.error(err);
+      setCategories(prev);
+    }
+  }, [categories])
+
+  const handleSave = async (category: Category) => {
+    const { id, ...categoryBody } = category;
+
+    if (editingCategory) {
+      setCategories(prev =>
+        prev.map(c => (c.id === id ? category : c))
+      )
+
+      await CategoryService.updateCategory(id, categoryBody);
+    } else {
+      const tempId = crypto.randomUUID();
+      const optimisticCategory = { ...categoryBody, id: tempId };
+
+      setCategories(prev => [...prev, optimisticCategory]);
+      const { data } = await CategoryService.addCategory(categoryBody);
+
+      // replace temp id
+      setCategories(prev =>
+        prev.map(c => (c.id === tempId ? data : c))
+      );
+    }
+
+    setIsDialogOpen(false);
   }
 
-  const handleAddNew = () => {
-    setEditingCategory(null)
-    setIsDialogOpen(true)
+  /** ---------------- Render ---------------- */
+  if (isLoading) {
+    return <p className="text-muted">Loading categories…</p>
   }
 
-  const incomeCategories = categories.filter((cat) => cat.type === "income")
-  const expenseCategories = categories.filter((cat) => cat.type === "expense")
+  if (error) {
+    return <p className="text-red-500">{error}</p>
+  }
 
   return (
     <div className="w-full">
@@ -49,135 +123,28 @@ export default function CategoriesPage() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Income Categories */}
-        <div>
-          <h2 className="mb-4 text-lg font-semibold text-foreground flex items-center gap-2">
-            <span className="text-green-500">↑</span>
-            <span>Income Categories</span>
-            <span className="text-xs font-normal text-muted">({incomeCategories.length})</span>
-          </h2>
-          <div className="space-y-2">
-            {incomeCategories.map((category) => (
-              <div
-                key={category.id}
-                className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:border-primary/50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="flex h-10 w-10 items-center justify-center rounded-full text-xl"
-                    style={{backgroundColor: `${category.color}20`}}
-                  >
-                    {category.icon}
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">{category.name}</p>
-                    <p className="text-xs text-muted">Income</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleEdit(category)}
-                    className="rounded-md p-2 text-muted hover:bg-background hover:text-foreground transition-colors"
-                  >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => handleDelete(category.id)}
-                    className="rounded-md p-2 text-muted hover:bg-red-50 hover:text-red-500 transition-colors"
-                  >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <CategoryList
+          title="Income Categories"
+          type="income"
+          categories={incomeCategories}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
 
-        {/* Expense Categories */}
-        <div>
-          <h2 className="mb-4 text-lg font-semibold text-foreground flex items-center gap-2">
-            <span className="text-red-500">↓</span>
-            <span>Expense Categories</span>
-            <span className="text-xs font-normal text-muted">({expenseCategories.length})</span>
-          </h2>
-          <div className="space-y-2">
-            {expenseCategories.map((category) => (
-              <div
-                key={category.id}
-                className="flex items-center justify-between rounded-lg border border-border bg-card p-4 hover:border-primary/50 transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className="flex h-10 w-10 items-center justify-center rounded-full text-xl"
-                    style={{backgroundColor: `${category.color}20`}}
-                  >
-                    {category.icon}
-                  </div>
-                  <div>
-                    <p className="font-medium text-foreground">{category.name}</p>
-                    <p className="text-xs text-muted">Expense</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => handleEdit(category)}
-                    className="rounded-md p-2 text-muted hover:bg-background hover:text-foreground transition-colors"
-                  >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    onClick={() => handleDelete(category.id)}
-                    className="rounded-md p-2 text-muted hover:bg-red-50 hover:text-red-500 transition-colors"
-                  >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                      />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <CategoryList
+          title="Expense Categories"
+          type="expense"
+          categories={expenseCategories}
+          onEdit={handleEdit}
+          onDelete={handleDelete}
+        />
       </div>
 
       {isDialogOpen && (
         <AddCategoryModal
           category={editingCategory}
           onClose={() => setIsDialogOpen(false)}
-          onSave={(category) => {
-            if (editingCategory) {
-              setCategories(categories.map((cat) => (cat.id === category.id ? category : cat)))
-            } else {
-              setCategories([...categories, { ...category, id: Date.now().toString() }])
-            }
-            setIsDialogOpen(false)
-          }}
+          onSave={handleSave}
         />
       )}
     </div>

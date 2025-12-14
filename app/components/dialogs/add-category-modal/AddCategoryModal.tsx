@@ -1,127 +1,193 @@
-'use client'
+"use client"
 
-import {Category} from "@/types/category";
-import React, {useState} from "react";
-import {COLOR_OPTIONS, ICON_OPTIONS} from "@/helpers/data";
-import {Button} from "@/components/ui/button";
+import React, {useCallback, useEffect, useMemo} from "react"
+import {Formik} from "formik"
+import {Category, CategoryCreate} from "@/types/category"
+import {COLOR_OPTIONS, ICON_OPTIONS} from "@/helpers/data"
+import {Button} from "@/components/ui/button"
+import {schema} from "./schema"
 
 type Props = {
   category: Category | null
   onClose: () => void
-  onSave: (category: Category) => void
+  onSave: (values: Category) => Promise<void> | void
 }
 
-const AddCategoryModal: React.FC<Props> = ({category, onClose, onSave}) => {
-  const [formData, setFormData] = useState<Omit<Category, "id">>({
-    name: category?.name || "",
-    type: category?.type || "expense",
-    color: category?.color || "#3b82f6",
-    icon: category?.icon || "📁",
-  })
+const AddCategoryModal: React.FC<Props> = (
+  {
+    category,
+    onClose,
+    onSave,
+  }) => {
+  /** ---------------- Initial values ---------------- */
+  const initialValues = useMemo<CategoryCreate>(
+    () => ({
+      name: category?.name ?? "",
+      type: category?.type ?? "expense",
+      color: category?.color ?? "#3b82f6",
+      icon: category?.icon ?? "📁",
+    }),
+    [category]
+  );
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSave({...formData, id: category?.id || Date.now().toString()})
-  }
+  /** ---------------- Escape key ---------------- */
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    }
+
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose])
+
+  /** ---------------- Submit ---------------- */
+  const handleSubmit = useCallback(
+    (values: CategoryCreate) => {
+      const categoryToSave: Category = {
+        ...values,
+        id: category?.id ?? "",
+      };
+      return onSave(categoryToSave);
+    },
+    [onSave, category?.id]
+  )
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-lg">
-        <h2 className="mb-4 text-xl font-bold text-foreground">{category ? "Edit Category" : "Add New Category"}</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Category Name</label>
-            <input
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-              placeholder="e.g., Groceries"
-              required
-            />
-          </div>
+        <h2 className="mb-4 text-xl font-bold">
+          {category ? "Edit Category" : "Add New Category"}
+        </h2>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Type</label>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setFormData({...formData, type: "income"})}
-                className={`flex-1 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-                  formData.type === "income"
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-background text-foreground hover:bg-accent"
-                }`}
-              >
-                Income
-              </button>
-              <button
-                type="button"
-                onClick={() => setFormData({...formData, type: "expense"})}
-                className={`flex-1 rounded-md border px-4 py-2 text-sm font-medium transition-colors ${
-                  formData.type === "expense"
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-background text-foreground hover:bg-accent"
-                }`}
-              >
-                Expense
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Color</label>
-            <div className="flex flex-wrap gap-2">
-              {COLOR_OPTIONS.map((color) => (
-                <button
-                  key={color}
-                  type="button"
-                  onClick={() => setFormData({...formData, color})}
-                  className={`h-8 w-8 rounded-full transition-all ${
-                    formData.color === color ? "ring-2 ring-primary ring-offset-2" : ""
-                  }`}
-                  style={{backgroundColor: color}}
+        <Formik
+          initialValues={initialValues}
+          validationSchema={schema}
+          onSubmit={handleSubmit}
+          enableReinitialize
+        >
+          {({
+              values,
+              handleChange,
+              handleSubmit,
+              setFieldValue,
+              touched,
+              errors,
+              isSubmitting,
+            }) => (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Name */}
+              <div className="space-y-2">
+                <label htmlFor="name" className="text-sm font-medium">
+                  Category Name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={values.name}
+                  onChange={handleChange}
+                  className="w-full rounded-md border px-3 py-2 text-sm focus:ring-1 focus:ring-primary"
+                  placeholder="e.g., Groceries"
                 />
-              ))}
-            </div>
-          </div>
+                {touched.name && errors.name && (
+                  <p className="text-sm text-red-500">{errors.name}</p>
+                )}
+              </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Icon</label>
-            <div className="flex flex-wrap gap-2">
-              {ICON_OPTIONS.map((icon) => (
-                <button
-                  key={icon}
+              {/* Type */}
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Type</label>
+                <div className="flex gap-2">
+                  {(["income", "expense"] as const).map(type => (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setFieldValue("type", type)}
+                      className={`flex-1 rounded-md border px-4 py-2 text-sm font-semibold cursor-pointer ${
+                        values.type === type
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border hover:bg-accent"
+                      }`}
+                    >
+                      {type === "income" ? "Income" : "Expense"}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Color */}
+              <div className="space-y-2">
+                <label className="text-sm font-semibold">Color</label>
+                <div className="flex flex-wrap gap-2">
+                  {COLOR_OPTIONS.map(color => (
+                    <button
+                      key={color}
+                      type="button"
+                      onClick={() => setFieldValue("color", color)}
+                      className={`h-8 w-8 rounded-full cursor-pointer ${
+                        values.color === color
+                          ? "ring-2 ring-primary ring-offset-2"
+                          : ""
+                      }`}
+                      style={{backgroundColor: color}}
+                      aria-label={`Select color ${color}`}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Icon */}
+              <div className="space-y-2">
+                <label className="text-sm font-semibold">Icon</label>
+                <div className="flex flex-wrap gap-2">
+                  {ICON_OPTIONS.map(icon => (
+                    <button
+                      key={icon}
+                      type="button"
+                      onClick={() => setFieldValue("icon", icon)}
+                      className={`flex h-10 w-10 items-center justify-center rounded-md border text-xl cursor-pointer ${
+                        values.icon === icon
+                          ? "border-primary bg-primary/10"
+                          : "border-border hover:bg-accent"
+                      }`}
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 pt-2">
+                <Button
                   type="button"
-                  onClick={() => setFormData({...formData, icon})}
-                  className={`flex h-10 w-10 items-center justify-center rounded-md border text-xl transition-all ${
-                    formData.icon === icon
-                      ? "border-primary bg-primary/10"
-                      : "border-border bg-background hover:bg-accent"
-                  }`}
+                  variant="ghost"
+                  onClick={onClose}
+                  disabled={isSubmitting}
+                  className="flex-1 cursor-pointer"
                 >
-                  {icon}
-                </button>
-              ))}
-            </div>
-          </div>
+                  Cancel
+                </Button>
 
-          <div className="flex gap-3 pt-2">
-            <Button
-              variant='ghost'
-              onClick={onClose}
-              className="flex-1 text-sm font-semibold text-foreground"
-            >
-              Cancel
-            </Button>
-            <button
-              type="submit"
-              className="flex-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
-            >
-              {category ? "Save Changes" : "Add Category"}
-            </button>
-          </div>
-        </form>
+                <Button
+                  className='cursor-pointer flex-2'
+                  type="submit"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting
+                    ? "Saving..."
+                    : category
+                      ? "Save Changes"
+                      : "Add Category"}
+                </Button>
+              </div>
+            </form>
+          )}
+        </Formik>
       </div>
     </div>
   )
