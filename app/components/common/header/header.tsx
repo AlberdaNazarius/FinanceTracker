@@ -102,7 +102,7 @@ export default function Header() {
               Transactions
             </Link>
             <Link href={Routes.CATEGORIES} className="text-sm font-medium text-muted">
-              Budgets
+              Categories
             </Link>
           </nav>
         </div>
