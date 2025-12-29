@@ -7,13 +7,19 @@ const getUser = async () => {
   return response.data;
 }
 
-async function refreshUser() {
+const refreshUser = async () => {
   const res = await fetch(ApiRoutes.USER);
   const updatedUser = await res.json();
   useUserStore.getState().setUser(updatedUser);
 }
 
+const getUserBalance = async () => {
+  const response = await axios.get(ApiRoutes.USER_BALANCE);
+  return response.data?.balance;
+}
+
 export const UserService = {
   getUser,
   refreshUser,
+  getUserBalance
 }

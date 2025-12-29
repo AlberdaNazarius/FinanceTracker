@@ -3,8 +3,8 @@ import {Category} from "@/types/category";
 import {Currency} from "@/types/currency";
 
 export type ResponseTransaction = {
-  id?: number;
-  user_id?: number;
+  id: string;
+  user_id?: string;
   type: TransactionType,
   category: Category;
   amount: number;

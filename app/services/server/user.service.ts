@@ -20,7 +20,6 @@ const getUserRequest = async (): Promise<User | null> => {
       .from("user")
       .select(`
         username,
-        balance,
         preferred_currency:preferred_currency_id (*)
       `)
       .eq("id", authUser.id)
@@ -28,7 +27,6 @@ const getUserRequest = async (): Promise<User | null> => {
 
     const userProfile: User = {
       username: profile?.username,
-      balance: profile?.balance,
       preferred_currency: Array.isArray(profile?.preferred_currency)
         ? profile!.preferred_currency[0]
         : profile!.preferred_currency!

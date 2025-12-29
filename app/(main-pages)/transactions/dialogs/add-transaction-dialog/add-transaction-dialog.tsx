@@ -15,11 +15,13 @@ import {Category} from "@/types/category";
 import {CURRENCIES} from "@/helpers/constants";
 import {RequestTransaction} from "@/types/request/request-transaction";
 import useUserStore from "@/store/user-store";
-import {UserService} from "@/service/client/user.service";
 import {getCurrencySymbol} from "@/helpers/utils";
 
-const AddTransactionDialog: React.FC = () => {
-  const {updateBalance} = useUserStore();
+type Props = {
+  onSuccess?: () => void;
+}
+
+const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
   const currencySymbol = useUserStore(state =>
     getCurrencySymbol(state.user?.preferred_currency?.code)
   );
@@ -38,8 +40,6 @@ const AddTransactionDialog: React.FC = () => {
 
   const handleSubmit = async (values: RequestTransaction) => {
     if (!values) return;
-
-    updateBalance(values.amount, values.type);
     setOpen(false);
 
     const newTransaction: RequestTransaction = {
@@ -48,7 +48,7 @@ const AddTransactionDialog: React.FC = () => {
       transaction_date: new Date(values.transaction_date)
     }
     await TransactionService.addTransaction(newTransaction);
-    await UserService.refreshUser();
+    onSuccess?.();
   }
 
   useEffect(() => {

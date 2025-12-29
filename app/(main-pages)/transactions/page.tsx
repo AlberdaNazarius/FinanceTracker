@@ -10,6 +10,23 @@ import {TransactionType} from "@/enum/transaction-type";
 const Transactions = () => {
   const [userTransactions, setUserTransactions] = useState<ResponseTransaction[]>([]);
 
+  const handleEdit = (id?: string) => {
+    console.log("Edit transaction with ID:", id);
+    if (!id) return;
+  }
+
+  const handleDelete = async (id?: string) => {
+    if (!id) return;
+    try {
+      await TransactionService.deleteTransaction(id);
+      setUserTransactions(prevTransactions =>
+        prevTransactions.filter(transaction => transaction.id !== id)
+      );
+    } catch (error) {
+      console.error("Error deleting transaction:", error);
+    }
+  }
+
   useEffect(() => {
     if (userTransactions && userTransactions.length > 0) return;
 
@@ -76,16 +93,18 @@ const Transactions = () => {
                   {transaction?.description && (
                     <div className="sm:col-span-2 lg:col-span-3">
                       <div className="text-xs font-semibold text-muted-foreground mb-1">Description</div>
-                      <div className="text-sm text-foreground">{transaction.description}</div>
+                      <div className="text-sm text-foreground">{transaction?.description}</div>
                     </div>
                   )}
 
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4">
                     <button
+                      onClick={() => handleEdit(transaction?.id)}
                       className="cursor-pointer flex-1 sm:flex-none px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">
                       Edit Transaction
                     </button>
                     <button
+                      onClick={() => handleDelete(transaction?.id)}
                       className="cursor-pointer flex-1 sm:flex-none px-4 py-2 bg-card text-danger border border-border rounded-lg text-sm font-semibold hover:bg-danger/5 transition-colors">
                       Delete
                     </button>

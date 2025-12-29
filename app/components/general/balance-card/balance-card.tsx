@@ -2,17 +2,15 @@
 
 import React from 'react';
 import {cn, formatMoney} from "@/helpers/utils";
-import useUserStore from "@/store/user-store";
 
 type BalanceCardProps = {
   amount: number;
   title: string;
+  preferredCurrency?: string;
   numberColor?: string;
 }
 
-const BalanceCard: React.FC<BalanceCardProps> = ({amount, title, numberColor}) => {
-  const {user} = useUserStore();
-
+const BalanceCard: React.FC<BalanceCardProps> = ({amount, title, preferredCurrency, numberColor}) => {
   return (
     <div className="rounded-[var(--radius-lg)] bg-card p-4 sm:p-6 shadow-sm border border-border">
       <div className="flex flex-col justify-center items-center gap-4">
@@ -23,7 +21,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({amount, title, numberColor}) =
               "text-3xl sm:text-4xl font-bold text-foreground",
               numberColor ?? `text-[${numberColor}]`
             )}>
-            {formatMoney(amount, user?.preferred_currency.code)}
+            {formatMoney(amount, preferredCurrency)}
           </h2>
         </div>
       </div>

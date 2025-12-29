@@ -11,7 +11,17 @@ const addTransaction = async (transactionData: RequestTransaction) => {
   await axios.post(ApiRoutes.TRANSACTIONS, transactionData);
 }
 
+const updateTransaction = async (transactionId: string, transactionData: RequestTransaction) => {
+  await axios.put(`${ApiRoutes.TRANSACTIONS}/${transactionId}`, transactionData);
+}
+
+const deleteTransaction = async (transactionId: string) => {
+  await axios.delete(`${ApiRoutes.TRANSACTIONS}/${transactionId}`);
+}
+
 export const TransactionService = {
   addTransaction,
-  getTransactions
+  getTransactions,
+  updateTransaction,
+  deleteTransaction
 }
