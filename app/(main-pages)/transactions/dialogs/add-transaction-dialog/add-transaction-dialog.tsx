@@ -21,11 +21,12 @@ type Props = {
   onSuccess?: () => void;
 }
 
-const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
-  const currencySymbol = useUserStore(state =>
-    getCurrencySymbol(state.user?.preferred_currency?.code)
-  );
+type GroupedCategories = {
+  [key in TransactionType]?: Category[];
+}
 
+// TODO move to other folder cause it's not used in transaction page
+const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
   const formInitState: RequestTransaction = {
     category_id: null,
     currency_id: CURRENCIES[0].id,
@@ -35,8 +36,12 @@ const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
     transaction_date: new Date(),
   }
 
+  const currencySymbol = useUserStore(state =>
+    getCurrencySymbol(state.user?.preferred_currency?.code)
+  );
+
   const [open, setOpen] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [groupedCategories, setGroupedCategories] = useState<GroupedCategories>({});
 
   const handleSubmit = async (values: RequestTransaction) => {
     if (!values) return;
@@ -52,18 +57,39 @@ const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
   }
 
   useEffect(() => {
-    if(!open) return;
-    
-    const fetchData = async () => {
+    if (!open) return;
+
+    const fetchData = async (): Promise<Category[] | undefined> => {
       try {
         const response = await CategoryService.getCategories();
         //console.log("Fetched data:", response);
-        setCategories(response.data);
+        return response.data;
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     }
-    fetchData();
+
+    const groupCategories = async () => {
+      const categories = await fetchData();
+      if (!categories) {
+        return;
+      }
+
+      const categoriesByType = categories.reduce<GroupedCategories>((acc, category) => {
+        const {type} = category;
+
+        if (!acc[type]) {
+          acc[type] = [];
+        }
+
+        acc[type].push(category);
+
+        return acc;
+      }, {});
+      setGroupedCategories(categoriesByType);
+    };
+
+    groupCategories();
   }, [open]);
 
   return (
@@ -95,7 +121,7 @@ const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
                     value={values.amount}
                     onChange={handleChange}
                   />
-                {touched.amount && errors.amount && <p className="text-sm text-red-500 mt-1">{errors.amount}</p>}
+                  {touched.amount && errors.amount && <p className="text-sm text-red-500 mt-1">{errors.amount}</p>}
                 </div>
               </div>
 
@@ -129,14 +155,20 @@ const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
                     <SelectValue placeholder="Select a category"/>
                   </SelectTrigger>
                   <SelectContent>
-                    {categories?.map((category) => (
+                    {groupedCategories[values.type]?.map((category) => (
                       <SelectItem key={category.id} value={category.id}>
                         {category.name}
                       </SelectItem>
                     ))}
+                    {(!groupedCategories[values.type] || groupedCategories[values.type]?.length === 0) && (
+                      <div className="p-2 text-xs text-center text-muted-foreground">
+                        No {values.type} categories found
+                      </div>
+                    )}
                   </SelectContent>
                 </Select>
-                {touched.category_id && errors.category_id && <p className="text-sm text-red-500 mt-1">{errors.category_id}</p>}
+                {touched.category_id && errors.category_id &&
+                    <p className="text-sm text-red-500 mt-1">{errors.category_id}</p>}
               </div>
 
               <div className="space-y-2">
@@ -147,7 +179,8 @@ const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
                   value={values.description}
                   onChange={handleChange}
                 />
-                {touched.description && errors.description && <p className="text-sm text-red-500 mt-1">{errors.description}</p>}
+                {touched.description && errors.description &&
+                    <p className="text-sm text-red-500 mt-1">{errors.description}</p>}
               </div>
 
               <div className="space-y-2">
@@ -159,7 +192,8 @@ const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
                   onChange={handleChange}
                 />
               </div>
-              {touched.currency_id && errors.currency_id && <p className="text-sm text-red-500 mt-1">{errors.currency_id}</p>}
+              {touched.currency_id && errors.currency_id &&
+                  <p className="text-sm text-red-500 mt-1">{errors.currency_id}</p>}
 
               <div className="flex gap-3 pt-2">
                 <DialogClose className="flex-1 cursor-pointer">
