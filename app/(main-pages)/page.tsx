@@ -1,9 +1,9 @@
 'use client';
 
 import BalanceCard from "@/components/general/balance-card/balance-card";
-import AddTransactionDialog from "./transactions/dialogs/add-transaction-dialog/add-transaction-dialog";
 import useUserStore from "@/store/user-store";
 import {useBalance} from "../hooks/use-balance";
+import AddTransactionDialog from "@/components/page/home/dialogs/add-transaction-dialog/add-transaction-dialog";
 
 const Home = () => {
   const user = useUserStore(state => state.user);

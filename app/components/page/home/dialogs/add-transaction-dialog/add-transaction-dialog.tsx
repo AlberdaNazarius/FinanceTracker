@@ -25,7 +25,6 @@ type GroupedCategories = {
   [key in TransactionType]?: Category[];
 }
 
-// TODO move to other folder cause it's not used in transaction page
 const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
   const formInitState: RequestTransaction = {
     category_id: null,

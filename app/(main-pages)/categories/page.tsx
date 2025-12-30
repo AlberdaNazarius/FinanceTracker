@@ -2,9 +2,9 @@
 
 import {useCallback, useEffect, useMemo, useState} from "react"
 import {Category} from "@/types/category";
-import AddCategoryDialog from "./dialogs/add-category-dialog/add-category-dialog";
 import {CategoryService} from "@/service/client/category.service";
-import CategoryList from "./components/category-list/category-list";
+import CategoryList from "@/components/page/categories/category-list/category-list";
+import AddCategoryDialog from "@/components/page/categories/dialogs/add-category-dialog/add-category-dialog";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
