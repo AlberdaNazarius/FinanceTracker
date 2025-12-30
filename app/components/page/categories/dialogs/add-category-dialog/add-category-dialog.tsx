@@ -100,26 +100,27 @@ const AddCategoryDialog: React.FC<Props> = (
               </div>
 
               {/* Type */}
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Type</label>
-                <div className="flex gap-2">
-                  {([TransactionType.INCOME, TransactionType.EXPENSE] as const).map(type => (
-                    <button
-                      key={type}
-                      type="button"
-                      onClick={() => setFieldValue("type", type)}
-                      className={`flex-1 rounded-md border px-4 py-2 text-sm font-semibold cursor-pointer ${
-                        values.type === type
-                          ? "border-primary bg-primary text-primary-foreground"
-                          : "border-border hover:bg-accent"
-                      }`}
-                    >
-                      {type === TransactionType.INCOME ? "Income" : "Expense"}
-                    </button>
-                  ))}
+              {!category &&
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Type</label>
+                  <div className="flex gap-2">
+                    {([TransactionType.INCOME, TransactionType.EXPENSE] as const).map(type => (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => setFieldValue("type", type)}
+                        className={`flex-1 rounded-md border px-4 py-2 text-sm font-semibold cursor-pointer ${
+                          values.type === type
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border hover:bg-accent"
+                        }`}
+                      >
+                        {type === TransactionType.INCOME ? "Income" : "Expense"}
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              </div>
-
+              }
               {/* Color */}
               <div className="space-y-2">
                 <label className="text-sm font-semibold">Color</label>
