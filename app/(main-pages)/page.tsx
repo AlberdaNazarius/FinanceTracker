@@ -14,7 +14,7 @@ const Home = () => {
       <div className='w-full'>
         <BalanceCard
           title='Total Balance'
-          preferredCurrency={user?.preferred_currency?.code}
+          preferredCurrency={user?.preferredCurrency?.code}
           amount={balance}
         />
       </div>

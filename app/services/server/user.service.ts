@@ -20,16 +20,16 @@ const getUserRequest = async (): Promise<User | null> => {
       .from("user")
       .select(`
         username,
-        preferred_currency:preferred_currency_id (*)
+        preferredCurrency:preferred_currency_id (*)
       `)
       .eq("id", authUser.id)
       .single();
 
     const userProfile: User = {
       username: profile?.username,
-      preferred_currency: Array.isArray(profile?.preferred_currency)
-        ? profile!.preferred_currency[0]
-        : profile!.preferred_currency!
+      preferredCurrency: Array.isArray(profile?.preferredCurrency)
+        ? profile!.preferredCurrency[0]
+        : profile!.preferredCurrency!
     }
 
     return userProfile ?? null;

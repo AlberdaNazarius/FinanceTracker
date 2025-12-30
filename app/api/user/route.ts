@@ -20,7 +20,7 @@ export async function GET() {
       .select(`
         username,
         balance,
-        preferred_currency:preferred_currency_id (*)
+        preferredCurrency:preferred_currency_id (*)
       `)
       .eq("id", authUser.id)
       .single();

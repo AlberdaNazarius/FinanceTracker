@@ -37,7 +37,7 @@ const EditTransactionDialog: React.FC<Props> = ({transaction_id, onSuccess}) => 
   }
 
   const currencySymbol = useUserStore(state =>
-    getCurrencySymbol(state.user?.preferred_currency?.code)
+    getCurrencySymbol(state.user?.preferredCurrency?.code)
   );
 
   const [open, setOpen] = useState(false);

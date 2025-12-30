@@ -36,7 +36,7 @@ const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
   }
 
   const currencySymbol = useUserStore(state =>
-    getCurrencySymbol(state.user?.preferred_currency?.code)
+    getCurrencySymbol(state.user?.preferredCurrency?.code)
   );
 
   const [open, setOpen] = useState(false);
