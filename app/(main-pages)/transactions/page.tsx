@@ -2,44 +2,31 @@
 
 import {cn, formatDate, formatMoney} from "@/helpers/utils";
 import {TransactionService} from "@/service/client/transaction.service";
-import {useEffect, useState} from "react";
-import {ResponseTransaction} from "@/types/response/response-transaction";
+import {useCallback} from "react";
 import {Accordion, AccordionContent, AccordionItem, AccordionTrigger,} from "@/components/ui/accordion"
 import {TransactionType} from "@/enum/transaction-type";
+import EditTransactionDialog
+  from "@/components/page/transactions/dialogs/edit-transaction-dialog/edit-transaction-dialog";
+import {useTransactions} from "../../hooks/use-transactions";
 
 const Transactions = () => {
-  const [userTransactions, setUserTransactions] = useState<ResponseTransaction[]>([]);
+  const {transactions, refetch} = useTransactions();
 
-  const handleEdit = (id?: string) => {
-    console.log("Edit transaction with ID:", id);
-    if (!id) return;
-  }
+  const handleDelete = useCallback(
+    async (id?: string) => {
+      if (!id) return;
 
-  const handleDelete = async (id?: string) => {
-    if (!id) return;
-    try {
-      await TransactionService.deleteTransaction(id);
-      setUserTransactions(prevTransactions =>
-        prevTransactions.filter(transaction => transaction.id !== id)
-      );
-    } catch (error) {
-      console.error("Error deleting transaction:", error);
-    }
-  }
+      const previousTransactions = transactions;
 
-  useEffect(() => {
-    if (userTransactions && userTransactions.length > 0) return;
-
-    const fetchTransactions = async () => {
       try {
-        const response = await TransactionService.getTransactions();
-        setUserTransactions(response.data);
+        await TransactionService.deleteTransaction(id);
+        await refetch();
       } catch (error) {
-        console.error("Error fetching transactions:", error);
+        console.error("Failed to delete transaction:", error);
       }
-    }
-    fetchTransactions();
-  }, [userTransactions]);
+    },
+    [transactions, refetch]
+  );
 
   return (
     <div className="w-full">
@@ -52,7 +39,7 @@ const Transactions = () => {
       </div>
 
       <Accordion type="multiple" className="w-full bg-card border border-border">
-        {userTransactions.map((transaction, idx) => {
+        {transactions?.length > 0 && transactions?.map((transaction, idx) => {
           const isIncome = transaction?.type === TransactionType.INCOME;
           return (
             <AccordionItem
@@ -98,11 +85,7 @@ const Transactions = () => {
                   )}
 
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4">
-                    <button
-                      onClick={() => handleEdit(transaction?.id)}
-                      className="cursor-pointer flex-1 sm:flex-none px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:opacity-90 transition-opacity">
-                      Edit Transaction
-                    </button>
+                    <EditTransactionDialog transaction_id={transaction?.id} onSuccess={refetch}/>
                     <button
                       onClick={() => handleDelete(transaction?.id)}
                       className="cursor-pointer flex-1 sm:flex-none px-4 py-2 bg-card text-danger border border-border rounded-lg text-sm font-semibold hover:bg-danger/5 transition-colors">
