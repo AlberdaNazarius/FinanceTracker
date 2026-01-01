@@ -12,11 +12,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {Button} from "@/components/ui/button";
-import {useRouter} from "next/navigation";
+import {useRouter, usePathname} from "next/navigation";
+import {cn} from "@/helpers/utils";
 
 export default function Header() {
   const {user} = useUserStore();
   const router = useRouter();
+  const pathname = usePathname()
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -30,25 +32,34 @@ export default function Header() {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center gap-2">
+          <Link href={Routes.HOME} className="flex items-center gap-2">
             <CircleDollarSign className='h-6 w-6'/>
             <span className="text-xl font-bold text-foreground">FinTrack</span>
-          </div>
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6">
-            <Link href={Routes.HOME} className="text-sm font-semibold text-foreground hover:text-primary transition-colors">
+            <Link
+              className={cn(
+                'text-sm font-semibold text-muted hover:text-primary transition-colors',
+                pathname === Routes.HOME && 'text-foreground')}
+              href={Routes.HOME}
+            >
               Dashboard
             </Link>
             <Link
+              className={cn(
+                'text-sm font-semibold text-muted hover:text-primary transition-colors',
+                pathname === Routes.TRANSACTIONS && 'text-foreground')}
               href={Routes.TRANSACTIONS}
-              className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
             >
               Transactions
             </Link>
             <Link
+              className={cn(
+                'text-sm font-semibold text-muted hover:text-primary transition-colors',
+                pathname === Routes.CATEGORIES && 'text-foreground')}
               href={Routes.CATEGORIES}
-              className="text-sm font-semibold text-foreground hover:text-primary transition-colors"
             >
               Categories
             </Link>
@@ -95,13 +106,28 @@ export default function Header() {
       {isMenuOpen && (
         <div className="md:hidden border-t border-border bg-card px-4 py-3">
           <nav className="flex flex-col gap-3">
-            <Link href={Routes.HOME} className="text-sm font-medium text-foreground">
+            <Link
+              className={cn(
+                'text-sm font-semibold text-muted hover:text-primary transition-colors',
+                pathname === Routes.HOME && 'text-foreground')}
+              href={Routes.HOME}
+            >
               Dashboard
             </Link>
-            <Link href={Routes.TRANSACTIONS} className="text-sm font-medium text-muted">
+            <Link
+              className={cn(
+                'text-sm font-semibold text-muted hover:text-primary transition-colors',
+                pathname === Routes.TRANSACTIONS && 'text-foreground')}
+              href={Routes.TRANSACTIONS}
+            >
               Transactions
             </Link>
-            <Link href={Routes.CATEGORIES} className="text-sm font-medium text-muted">
+            <Link
+              className={cn(
+                'text-sm font-semibold text-muted hover:text-primary transition-colors',
+                pathname === Routes.CATEGORIES && 'text-foreground')}
+              href={Routes.CATEGORIES}
+            >
               Categories
             </Link>
           </nav>
