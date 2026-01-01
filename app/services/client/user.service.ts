@@ -15,7 +15,7 @@ const refreshUser = async () => {
 
 const getUserBalance = async () => {
   const response = await axios.get(ApiRoutes.USER_BALANCE);
-  return response.data?.balance;
+  return response.data?.data?.balance;
 }
 
 export const UserService = {

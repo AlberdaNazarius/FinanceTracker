@@ -1,31 +1,28 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/helpers/supabase/server";
-import { cookies } from 'next/headers'
+import {getSupabaseUser, jsonError} from "@/helpers/server-utils";
 
 export async function GET() {
   try {
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const { supabase, user } = await getSupabaseUser();
 
-    const {
-      data: { user: authUser },
-    } = await supabase.auth.getUser();
-
-    if (!authUser) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    if (!user) {
+      return jsonError("Unauthorized", 401);
     }
 
-    const { data: profile } = await supabase
+    const { data, error } = await supabase
       .from("user_balance")
-      .select(`balance`)
+      .select("balance")
+      .eq("user_id", user.id)
       .single();
 
-    return NextResponse.json(profile);
+    if (error) {
+      console.error("User balance fetch error:", error);
+      return jsonError(error.message, 400);
+    }
+
+    return NextResponse.json({ data }, { status: 200 });
   } catch (error) {
-    console.error(error);
-    return NextResponse.json(
-      { error: "Failed to fetch user profile" },
-      { status: 500 }
-    );
+    console.error("GET /user_balance error:", error);
+    return jsonError("Unexpected server error", 500);
   }
 }

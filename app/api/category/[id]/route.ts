@@ -1,93 +1,69 @@
-import {cookies} from "next/headers";
-import {createClient} from "@/helpers/supabase/server";
 import {NextRequest, NextResponse} from "next/server";
+import {getSupabaseUser, jsonError} from "@/helpers/server-utils";
 
 export async function PUT(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ){
   try {
-    const body = await req.json();
     const { id } = await context.params;
-    const updateData = body;
 
     if (!id) {
-      return NextResponse.json(
-        { error: "Category ID is required for updating" },
-        { status: 400 }
-      );
+      return jsonError("Category ID is required", 400);
     }
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
+    const body = await req.json();
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    if (!body || Object.keys(body).length === 0) {
+      return jsonError("Update payload is empty", 400);
+    }
+
+    const { supabase, user } = await getSupabaseUser();
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return jsonError("Unauthorized", 401);
     }
 
     const { data, error } = await supabase
       .from("category")
-      .update(updateData)
+      .update(body)
       .eq('id', id)
       .eq('user_id', user.id)
       .select()
       .single();
 
     if (error) {
-      console.error(error);
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      console.error("Category update error:", error);
+      return jsonError(error.message, 400);
     }
+
     if (!data) {
-      return NextResponse.json(
-        { error: "Category not found or access denied." },
-        { status: 404 }
-      );
+      return jsonError("Category not found or access denied", 404);
     }
 
     return NextResponse.json({ data }, { status: 200 });
 
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json(
-      { error: "Invalid request body or unexpected error" },
-      { status: 400 }
-    );
+  } catch (error) {
+    console.error("PUT /category error:", error);
+    return jsonError("Invalid request body or unexpected error", 400);
   }
 }
 
 export async function DELETE(
-  req: NextRequest,
+  _req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
     const { id } = await context.params;
 
     if (!id) {
-      return NextResponse.json(
-        { error: "Category ID is required for deletion" },
-        { status: 400 }
-      );
+      return jsonError("Category ID is required", 400);
     }
 
-    const cookieStore = await cookies();
-    const supabase = createClient(cookieStore);
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { supabase, user } = await getSupabaseUser();
 
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return jsonError("Unauthorized", 401);
     }
 
     const { data, error } = await supabase
@@ -99,23 +75,18 @@ export async function DELETE(
       .single();
 
     if (error) {
-      console.error(error);
-      return NextResponse.json({ error: error.message }, { status: 400 });
+      console.error("Category delete error:", error);
+      return jsonError(error.message, 400);
     }
+
     if (!data) {
-      return NextResponse.json(
-        { error: "Category not found or access denied." },
-        { status: 404 }
-      );
+      return jsonError("Category not found or access denied", 404);
     }
 
     return NextResponse.json({ data }, { status: 200 });
 
-  } catch (err) {
-    console.error(err);
-    return NextResponse.json(
-      { error: "Invalid request or unexpected error" },
-      { status: 400 }
-    );
+  } catch (error) {
+    console.error("DELETE /category error:", error);
+    return jsonError("Unexpected server error", 500);
   }
 }
