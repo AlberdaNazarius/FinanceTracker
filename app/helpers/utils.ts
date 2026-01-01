@@ -45,3 +45,15 @@ export const getCurrencySymbol = (currencyCode: string | undefined) => {
   const symbolPart = parts.find(part => part.type === "currency");
   return symbolPart ? symbolPart.value : code;
 }
+
+export const normalizeDateToInput = (value?: string | Date | null): string => {
+  if (!value) {
+    return new Date().toISOString().split("T")[0];
+  }
+
+  if (value instanceof Date) {
+    return value.toISOString().split("T")[0];
+  }
+
+  return value.split("T")[0];
+};

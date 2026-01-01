@@ -15,10 +15,11 @@ import {Category} from "@/types/category";
 import {CURRENCIES} from "@/helpers/constants";
 import {RequestTransaction} from "@/types/request/request-transaction";
 import useUserStore from "@/store/user-store";
-import {getCurrencySymbol} from "@/helpers/utils";
+import {getCurrencySymbol, normalizeDateToInput} from "@/helpers/utils";
+import {ResponseTransaction} from "@/types/response/response-transaction";
 
 type Props = {
-  transaction_id: string;
+  transaction: ResponseTransaction;
   onSuccess?: () => void;
 }
 
@@ -30,14 +31,14 @@ type TransactionFormValues = Omit<RequestTransaction, 'transaction_date'> & {
   transaction_date: string;
 };
 
-const EditTransactionDialog: React.FC<Props> = ({transaction_id, onSuccess}) => {
+const EditTransactionDialog: React.FC<Props> = ({transaction, onSuccess}) => {
   const formInitState: TransactionFormValues = {
-    category_id: null,
-    currency_id: CURRENCIES[0].id,
-    amount: 0,
-    type: TransactionType.EXPENSE,
-    description: "",
-    transaction_date: new Date().toISOString().split("T")[0],
+    category_id: transaction?.category?.id ?? null,
+    currency_id: transaction?.currency?.id ?? CURRENCIES[0].id,
+    amount: transaction?.amount ?? 0,
+    type: transaction?.type ?? TransactionType.EXPENSE,
+    description: transaction?.description ?? '',
+    transaction_date: normalizeDateToInput(transaction?.transaction_date),
   }
 
   const currencySymbol = useUserStore(state =>
@@ -48,7 +49,10 @@ const EditTransactionDialog: React.FC<Props> = ({transaction_id, onSuccess}) => 
   const [groupedCategories, setGroupedCategories] = useState<GroupedCategories>({});
 
   const handleSubmit = async (values: TransactionFormValues) => {
-    if (!values) return;
+    if (!transaction?.id) {
+      console.error('EditTransactionDialog: Cannot update transaction, id is missing.', transaction);
+      return;
+    }
     setOpen(false);
 
     const newTransaction: RequestTransaction = {
@@ -56,7 +60,7 @@ const EditTransactionDialog: React.FC<Props> = ({transaction_id, onSuccess}) => 
       description: values.description ? values.description : 'General transaction',
       transaction_date: new Date(values.transaction_date)
     }
-    await TransactionService.updateTransaction(transaction_id, newTransaction);
+    await TransactionService.updateTransaction(transaction.id, newTransaction);
     onSuccess?.();
   }
 

@@ -85,7 +85,7 @@ const Transactions = () => {
                   )}
 
                   <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4">
-                    <EditTransactionDialog transaction_id={transaction?.id} onSuccess={refetch}/>
+                    <EditTransactionDialog transaction={transaction} onSuccess={refetch}/>
                     <button
                       onClick={() => handleDelete(transaction?.id)}
                       className="cursor-pointer flex-1 sm:flex-none px-4 py-2 bg-card text-danger border border-border rounded-lg text-sm font-semibold hover:bg-danger/5 transition-colors">
