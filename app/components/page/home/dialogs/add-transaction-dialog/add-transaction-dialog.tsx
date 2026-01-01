@@ -25,14 +25,18 @@ type GroupedCategories = {
   [key in TransactionType]?: Category[];
 }
 
+type TransactionFormValues = Omit<RequestTransaction, 'transaction_date'> & {
+  transaction_date: string;
+};
+
 const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
-  const formInitState: RequestTransaction = {
+  const formInitState: TransactionFormValues = {
     category_id: null,
     currency_id: CURRENCIES[0].id,
     amount: 0,
     type: TransactionType.EXPENSE,
     description: "",
-    transaction_date: new Date(),
+    transaction_date: new Date().toISOString().split("T")[0],
   }
 
   const currencySymbol = useUserStore(state =>
@@ -42,7 +46,7 @@ const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
   const [open, setOpen] = useState(false);
   const [groupedCategories, setGroupedCategories] = useState<GroupedCategories>({});
 
-  const handleSubmit = async (values: RequestTransaction) => {
+  const handleSubmit = async (values: TransactionFormValues) => {
     if (!values) return;
     setOpen(false);
 
@@ -187,7 +191,7 @@ const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
                 <Input
                   id="transaction_date"
                   type="date"
-                  value={values.transaction_date.toISOString().split('T')[0]}
+                  value={values.transaction_date}
                   onChange={handleChange}
                 />
               </div>
