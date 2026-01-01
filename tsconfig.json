@@ -25,6 +25,7 @@
       "@/enum/*": ["./app/enum/*"],
       "@/service/*": ["./app/services/*"],
       "@/store/*": ["./app/store/*"],
+      "@/hooks/*": ["./app/hooks/*"],
     }
   },
   "include": [
