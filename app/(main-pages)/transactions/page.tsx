@@ -49,7 +49,7 @@ const Transactions = () => {
             >
               <AccordionTrigger
                 className="rounded-none hover:no-underline hover:bg-accent/50 px-4 py-3 text-sm cursor-pointer transition-colors">
-                <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 w-full text-left items-center">
+                <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 w-full text-left items-center">
                   <div className="sm:col-span-5 font-semibold truncate">
                     {transaction?.description ?? 'N/A'}
                   </div>

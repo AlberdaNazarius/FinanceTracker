@@ -1,28 +1,31 @@
 'use client';
 
-import BalanceCard from "@/components/general/balance-card/balance-card";
 import useUserStore from "@/store/user-store";
 import {useBalance} from "../hooks/use-balance";
 import AddTransactionDialog from "@/components/page/home/dialogs/add-transaction-dialog/add-transaction-dialog";
+import BalanceCard from "@/components/page/home/balance-card/balance-card";
+import SpendingChart from "@/components/page/home/spending-chart/spending-chart";
+import BudgetOverview from "@/components/page/home/budget-overview/budget-overview";
 
 const Home = () => {
   const user = useUserStore(state => state.user);
-  const { balance, refetch } = useBalance();
+  const {balance, refetch} = useBalance();
 
   return (
-    <div className="flex flex-col items-center gap-4">
-      <div className='w-full'>
+    <div className="grid gap-4 sm:gap-6 lg:grid-cols-3 pb-6 w-full">
+      <div className="lg:col-span-2 space-y-4 sm:space-y-6">
         <BalanceCard
           title='Total Balance'
           preferredCurrency={user?.preferredCurrency?.code}
           amount={balance}
         />
+        <AddTransactionDialog onSuccess={refetch}/>
+        <SpendingChart />
       </div>
-      {/*<div className='flex gap-4'>*/}
-      {/*  <BalanceCard title='Expenses' amount={32}/>*/}
-      {/*  <BalanceCard title='Income' amount={43}/>*/}
-      {/*</div>*/}
-      <AddTransactionDialog onSuccess={refetch}/>
+
+      <div className="space-y-4 sm:space-y-6">
+        <BudgetOverview />
+      </div>
     </div>
   );
 }
