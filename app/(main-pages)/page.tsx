@@ -1,7 +1,7 @@
 'use client';
 
 import useUserStore from "@/store/user-store";
-import {useBalance} from "../hooks/use-balance";
+import {useBalance} from "@/hooks/use-balance";
 import AddTransactionDialog from "@/components/page/home/dialogs/add-transaction-dialog/add-transaction-dialog";
 import BalanceCard from "@/components/page/home/balance-card/balance-card";
 import SpendingChart from "@/components/page/home/spending-chart/spending-chart";
