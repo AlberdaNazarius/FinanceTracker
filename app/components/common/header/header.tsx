@@ -1,7 +1,6 @@
 "use client"
 
-import {useState} from "react"
-import {CircleDollarSign, User, Menu} from "lucide-react"
+import {CircleDollarSign, User} from "lucide-react"
 import Link from "next/link"
 import useUserStore from "@/store/user-store";
 import {AuthService} from "@/service/client/auth.service";
@@ -19,8 +18,6 @@ export default function Header() {
   const {user} = useUserStore();
   const router = useRouter();
   const pathname = usePathname()
-
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await AuthService.logout();
@@ -94,45 +91,8 @@ export default function Header() {
               </div>
             )}
           </div>
-
-          {/* Mobile menu button */}
-          <button className="md:hidden p-2 cursor-pointer" onClick={() => setIsMenuOpen(!isMenuOpen)}>
-            <Menu className='h-6 w-6'/>
-          </button>
         </div>
       </div>
-
-      {/* Mobile Navigation */}
-      {isMenuOpen && (
-        <div className="md:hidden border-t border-border bg-card px-4 py-3">
-          <nav className="flex flex-col gap-3">
-            <Link
-              className={cn(
-                'text-sm font-semibold text-muted hover:text-primary transition-colors',
-                pathname === Routes.HOME && 'text-foreground')}
-              href={Routes.HOME}
-            >
-              Dashboard
-            </Link>
-            <Link
-              className={cn(
-                'text-sm font-semibold text-muted hover:text-primary transition-colors',
-                pathname === Routes.TRANSACTIONS && 'text-foreground')}
-              href={Routes.TRANSACTIONS}
-            >
-              Transactions
-            </Link>
-            <Link
-              className={cn(
-                'text-sm font-semibold text-muted hover:text-primary transition-colors',
-                pathname === Routes.CATEGORIES && 'text-foreground')}
-              href={Routes.CATEGORIES}
-            >
-              Categories
-            </Link>
-          </nav>
-        </div>
-      )}
     </header>
   )
 }
