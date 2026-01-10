@@ -98,7 +98,10 @@ const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger
-        className="w-full bg-primary font-bold text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors cursor-pointer">
+        className="w-full bg-primary font-semibold text-primary-foreground px-6 py-3.5 rounded-lg hover:bg-primary/90 transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg active:scale-[0.98] flex items-center justify-center gap-2">
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
         Add Transaction
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">

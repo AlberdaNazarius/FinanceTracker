@@ -12,6 +12,7 @@ import {
 import { TransactionType } from "@/enum/transaction-type";
 import EditTransactionDialog from "@/components/page/transactions/dialogs/edit-transaction-dialog/edit-transaction-dialog";
 import { ResponseTransaction } from "@/types/response/response-transaction";
+import { ArrowUpCircle, ArrowDownCircle } from "lucide-react";
 
 type TransactionTableProps = {
   transactions: ResponseTransaction[];
@@ -23,8 +24,6 @@ const TransactionTable = ({ transactions, refetch }: TransactionTableProps) => {
     async (id?: string) => {
       if (!id) return;
 
-      const previousTransactions = transactions;
-
       try {
         await TransactionService.deleteTransaction(id);
         await refetch();
@@ -32,7 +31,7 @@ const TransactionTable = ({ transactions, refetch }: TransactionTableProps) => {
         console.error("Failed to delete transaction:", error);
       }
     },
-    [transactions, refetch]
+    [refetch]
   );
 
   return (
@@ -46,7 +45,7 @@ const TransactionTable = ({ transactions, refetch }: TransactionTableProps) => {
 
       <Accordion
         type="multiple"
-        className="w-full bg-card border border-border"
+        className="w-full bg-card border border-border rounded-b-lg overflow-hidden"
       >
         {transactions.length > 0 ? (
           transactions.map((transaction, idx) => {
@@ -57,45 +56,126 @@ const TransactionTable = ({ transactions, refetch }: TransactionTableProps) => {
                 value={idx.toString()}
                 className="border-b"
               >
-                <AccordionTrigger className="rounded-none hover:no-underline hover:bg-accent/50 px-4 py-3 text-sm cursor-pointer transition-colors">
+                <AccordionTrigger className="rounded-none hover:no-underline hover:bg-accent/50 px-3 sm:px-4 py-3 sm:py-3 text-sm cursor-pointer transition-colors">
                   <div className="grid grid-cols-1 sm:grid-cols-12 gap-2 sm:gap-4 w-full text-left items-center">
-                    <div className="sm:col-span-5 font-semibold truncate">
-                      {transaction?.description ?? "N/A"}
+                    {/* Mobile Layout */}
+                    <div className="sm:hidden w-full space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-start gap-2 flex-1 min-w-0">
+                          <div
+                            className={cn(
+                              "mt-0.5 p-1 rounded-full shrink-0",
+                              isIncome
+                                ? "bg-emerald-100 dark:bg-emerald-900/30"
+                                : "bg-red-100 dark:bg-red-900/30"
+                            )}
+                          >
+                            {isIncome ? (
+                              <ArrowUpCircle
+                                className={cn(
+                                  "h-4 w-4",
+                                  isIncome
+                                    ? "text-emerald-600 dark:text-emerald-400"
+                                    : "text-red-600 dark:text-red-400"
+                                )}
+                              />
+                            ) : (
+                              <ArrowDownCircle
+                                className={cn(
+                                  "h-4 w-4",
+                                  isIncome
+                                    ? "text-emerald-600 dark:text-emerald-400"
+                                    : "text-red-600 dark:text-red-400"
+                                )}
+                              />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-foreground truncate">
+                              {transaction?.description ?? "N/A"}
+                            </div>
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                              {transaction?.category && (
+                                <div
+                                  className="flex h-4 w-4 items-center justify-center rounded-full text-[10px] shrink-0"
+                                  style={{
+                                    backgroundColor: `${transaction.category.color}20`,
+                                  }}
+                                >
+                                  {transaction.category.icon}
+                                </div>
+                              )}
+                              <span>
+                                {transaction?.category?.name ?? "N/A"} •{" "}
+                                {formatDate(transaction?.transaction_date)}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          className={cn(
+                            "text-right font-semibold text-base shrink-0",
+                            isIncome
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-red-600 dark:text-red-400"
+                          )}
+                        >
+                          {isIncome ? "+" : "-"}
+                          {formatMoney(
+                            transaction?.amount,
+                            transaction?.currency?.code
+                          )}
+                        </div>
+                      </div>
                     </div>
 
-                    <div className="sm:col-span-3 text-muted-foreground hidden sm:block">
-                      {transaction?.category?.name ?? "N/A"}
-                    </div>
+                    {/* Desktop Layout */}
+                    <div className="hidden sm:grid sm:grid-cols-12 sm:col-span-12 gap-4 w-full">
+                      <div className="sm:col-span-5 font-semibold truncate">
+                        {transaction?.description ?? "N/A"}
+                      </div>
 
-                    <div className="sm:col-span-2 text-muted-foreground hidden sm:block">
-                      {formatDate(transaction?.transaction_date)}
-                    </div>
+                      <div className="sm:col-span-3 text-muted-foreground flex items-center gap-2">
+                        {transaction?.category && (
+                          <div
+                            className="flex h-6 w-6 items-center justify-center rounded-full text-xs shrink-0"
+                            style={{
+                              backgroundColor: `${transaction.category.color}20`,
+                            }}
+                          >
+                            {transaction.category.icon}
+                          </div>
+                        )}
+                        <span>{transaction?.category?.name ?? "N/A"}</span>
+                      </div>
 
-                    <div
-                      className={cn(
-                        "sm:col-span-2 sm:text-right font-semibold",
-                        isIncome ? "text-emerald-600" : "text-red-600"
-                      )}
-                    >
-                      {isIncome ? "+" : "-"}
-                      {formatMoney(
-                        transaction?.amount,
-                        transaction?.currency?.code
-                      )}
-                    </div>
+                      <div className="sm:col-span-2 text-muted-foreground">
+                        {formatDate(transaction?.transaction_date)}
+                      </div>
 
-                    <div className="sm:hidden text-xs text-muted-foreground col-span-1 mt-1">
-                      {formatDate(transaction?.transaction_date)} •{" "}
-                      {transaction?.category?.name}
+                      <div
+                        className={cn(
+                          "sm:col-span-2 sm:text-right font-semibold",
+                          isIncome
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-red-600 dark:text-red-400"
+                        )}
+                      >
+                        {isIncome ? "+" : "-"}
+                        {formatMoney(
+                          transaction?.amount,
+                          transaction?.currency?.code
+                        )}
+                      </div>
                     </div>
                   </div>
                 </AccordionTrigger>
 
                 <AccordionContent className="p-0 border-t border-border/40 bg-accent/5">
-                  <div className="px-4 sm:px-6 py-4 sm:py-5">
+                  <div className="px-3 sm:px-6 py-4 sm:py-5">
                     {transaction?.description && (
-                      <div className="sm:col-span-2 lg:col-span-3">
-                        <div className="text-xs font-semibold text-muted-foreground mb-1">
+                      <div className="sm:col-span-2 lg:col-span-3 mb-4">
+                        <div className="text-xs font-semibold text-muted-foreground mb-1.5">
                           Description
                         </div>
                         <div className="text-sm text-foreground">
@@ -104,14 +184,14 @@ const TransactionTable = ({ transactions, refetch }: TransactionTableProps) => {
                       </div>
                     )}
 
-                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-4">
+                    <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                       <EditTransactionDialog
                         transaction={transaction}
                         onSuccess={refetch}
                       />
                       <button
                         onClick={() => handleDelete(transaction?.id)}
-                        className="cursor-pointer flex-1 sm:flex-none px-4 py-2 bg-card text-danger border border-border rounded-lg text-sm font-semibold hover:bg-danger/5 transition-colors"
+                        className="cursor-pointer flex-1 sm:flex-none px-4 py-2.5 bg-card text-danger border border-danger/30 rounded-lg text-sm font-semibold hover:bg-danger/10 active:scale-[0.98] transition-all"
                       >
                         Delete
                       </button>

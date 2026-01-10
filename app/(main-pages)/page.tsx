@@ -18,19 +18,22 @@ const Home = () => {
   };
 
   return (
-    <div className="grid gap-4 sm:gap-6 lg:grid-cols-3 pb-6 w-full">
-      <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-        <BalanceCard
-          title='Total Balance'
-          preferredCurrency={user?.preferredCurrency?.code}
-          amount={balance}
-        />
-        <AddTransactionDialog onSuccess={handleTransactionAdded}/>
-        <SpendingChart transactions={transactions} loading={loading} />
-      </div>
+    <div className="space-y-4 sm:space-y-6 pb-6 w-full">
+      <BalanceCard
+        title='Total Balance'
+        preferredCurrency={user?.preferredCurrency?.code}
+        amount={balance}
+      />
 
-      <div className="space-y-4 sm:space-y-6">
-        <BudgetOverview />
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+          <AddTransactionDialog onSuccess={handleTransactionAdded}/>
+          <SpendingChart transactions={transactions} loading={loading} />
+        </div>
+
+        <div className="space-y-4 sm:space-y-6">
+          <BudgetOverview />
+        </div>
       </div>
     </div>
   );
