@@ -3,5 +3,5 @@ export type BudgetSummary = {
   category: string;
   spent: number;
   remaining: number;
-  used_percent: number;
+  usedPercentage: number;
 }

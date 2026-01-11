@@ -8,5 +8,7 @@ export type Budget = {
   updated_at: string;
 }
 
-export type BudgetCreate = Omit<Budget, "id" | "created_at">
+export type BudgetCreate = Omit<Budget, "id" | "created_at" | "updated_at">
+
+export type BudgetUpdate = Omit<Budget, "id" | "created_at">;
 

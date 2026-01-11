@@ -1,6 +1,6 @@
 import axios from "axios";
 import {ApiRoutes} from "@/enum/api-routes";
-import {BudgetCreate} from "@/types/budget";
+import {BudgetCreate, BudgetUpdate} from "@/types/budget";
 
 const getBudgetView = async () => {
   const response = await axios.get(ApiRoutes.BUDGET);
@@ -12,7 +12,7 @@ const createBudget = async (budgetData: BudgetCreate) => {
   return response.data;
 }
 
-const updateBudget = async (budgetId: number, budgetData: BudgetCreate) => {
+const updateBudget = async (budgetId: number, budgetData: BudgetUpdate) => {
   const response = await axios.put(`${ApiRoutes.BUDGET}/${budgetId}`, budgetData);
   return response.data;
 }
@@ -23,5 +23,8 @@ const deleteBudget = async (budgetId: number) => {
 }
 
 export const BudgetService = {
-  getBudgetView
+  getBudgetView,
+  createBudget,
+  updateBudget,
+  deleteBudget
 }
