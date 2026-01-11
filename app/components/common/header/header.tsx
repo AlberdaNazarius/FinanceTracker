@@ -60,6 +60,14 @@ export default function Header() {
             >
               Categories
             </Link>
+            <Link
+              className={cn(
+                'text-sm font-semibold text-muted hover:text-primary transition-colors',
+                pathname === Routes.BUDGET && 'text-foreground')}
+              href={Routes.BUDGET}
+            >
+              Budget
+            </Link>
           </nav>
 
           {/* User Menu */}
