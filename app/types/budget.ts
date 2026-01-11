@@ -1,8 +1,12 @@
-import {Category} from "@/types/category";
-
 export type Budget = {
-  id: number;
+  id: string;
+  category_id: string;
   amount: number;
-  category: Category;
-  created_at?: Date;
+  period_start: string;
+  period_end: string;
+  created_at: string;
+  updated_at: string;
 }
+
+export type BudgetCreate = Omit<Budget, "id" | "created_at">
+
