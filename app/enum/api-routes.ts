@@ -4,4 +4,5 @@ export enum ApiRoutes {
   TRANSACTIONS = '/api/transactions',
   CATEGORY = '/api/category',
   BUDGET = '/api/budget',
+  BUDGET_SUMMARY = '/api/budget/summary',
 }

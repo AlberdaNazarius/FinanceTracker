@@ -10,23 +10,31 @@ export async function GET() {
     }
 
     const { data, error } = await supabase
-      .from("budget_summary")
+      .from("budget")
       .select(`
-        budget,
-        category,
-        spent,
-        remaining,
-        usedPercentage:used_percent
+        id,
+        amount,
+        periodStart:period_start,
+        periodEnd:period_end,
+        createdAt:created_at,
+        updatedAt:updated_at,
+        category:category_id (
+          id,
+          name,
+          type,
+          color,
+          icon
+        )
       `)
       .eq("user_id", user.id)
-      .single();
+      .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Budget summary fetch error:", error);
+      console.error("Budget fetch error:", error);
       return jsonError(error.message, 400);
     }
 
-    return NextResponse.json({ data }, { status: 200 });
+    return NextResponse.json({ data: data || [] }, { status: 200 });
   } catch (error) {
     console.error("GET /budget error:", error);
     return jsonError("Unexpected server error", 500);

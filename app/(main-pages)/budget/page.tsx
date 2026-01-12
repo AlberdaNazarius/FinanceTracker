@@ -1,61 +1,67 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Wallet, AlertTriangle } from "lucide-react";
+import {useState, useCallback} from "react";
+import { Plus, Wallet, AlertTriangle, Trash2, Edit2 } from "lucide-react";
 import { cn, formatMoney } from "@/helpers/utils";
 import useUserStore from "@/store/user-store";
+import AddBudgetDialog from "@/components/page/budget/dialogs/add-budget-dialog/add-budget-dialog";
+import { BudgetService } from "@/service/client/budget.service";
+import {useBudgetSummary} from "@/hooks/use-budget-summary";
+import {DANGER_BUDGET_THRESHOLD, WARNING_BUDGET_THRESHOLD} from "@/helpers/constants";
+import {Budget} from "@/types/budget";
 
 const BudgetPage = () => {
   const user = useUserStore((state) => state.user);
   const currencyCode = user?.preferredCurrency?.code;
+  const { budgetsSummary, loading, refetch } = useBudgetSummary();
 
-  const budgets = [
-    {
-      id: "1",
-      category: { name: "Housing", icon: "🏠", color: "#3b82f6" },
-      spent: 1800,
-      total: 2000,
-    },
-    {
-      id: "2",
-      category: { name: "Food", icon: "🍔", color: "#10b981" },
-      spent: 850,
-      total: 1000,
-    },
-    {
-      id: "3",
-      category: { name: "Transport", icon: "🚗", color: "#f59e0b" },
-      spent: 450,
-      total: 500,
-    },
-    {
-      id: "4",
-      category: { name: "Entertainment", icon: "🎬", color: "#8b5cf6" },
-      spent: 380,
-      total: 400,
-    },
-    {
-      id: "5",
-      category: { name: "Shopping", icon: "🛍️", color: "#ec4899" },
-      spent: 620,
-      total: 600,
-    },
-    {
-      id: "6",
-      category: { name: "Health", icon: "🏥", color: "#ef4444" },
-      spent: 200,
-      total: 300,
-    },
-  ];
+  const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const totalBudget = budgets.reduce((sum, b) => sum + b.total, 0);
-  const totalSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
-  const remaining = totalBudget - totalSpent;
-  const overallPercentage = (totalSpent / totalBudget) * 100;
+  const totalBudget = budgetsSummary.reduce((sum, b) => sum + b.budget, 0);
+  const totalSpent = budgetsSummary.reduce((sum, b) => sum + b.spent, 0);
+  const remaining = budgetsSummary.reduce((sum, b) => sum + b.remaining, 0);
+  const overallPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
 
   const handleAddBudget = () => {
-    console.log("Add budget clicked");
+    setEditingBudget(null);
+    setIsDialogOpen(true);
   };
+
+  const handleEditBudget = async (budgetId: string) => {
+    const editingBudget = await BudgetService.getBudgetById(budgetId);
+
+    setEditingBudget(editingBudget);
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteBudget = useCallback(
+    async (budgetId: string) => {
+      if (!confirm("Are you sure you want to delete this budget?")) return;
+
+      try {
+        await BudgetService.deleteBudget(budgetId);
+        await refetch();
+      } catch (error) {
+        console.error("Failed to delete budget:", error);
+      }
+    },
+    [refetch]
+  );
+
+  const handleDialogSuccess = async () => {
+    await refetch();
+    setIsDialogOpen(false);
+    setEditingBudget(null);
+  };
+
+  if (loading) {
+    return (
+      <div className="w-full flex items-center justify-center py-12">
+        <p className="text-muted-foreground">Loading budgets...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full space-y-4 sm:space-y-6">
@@ -68,14 +74,22 @@ const BudgetPage = () => {
             Manage your monthly spending limits
           </p>
         </div>
-        <button
-          onClick={handleAddBudget}
-          className="cursor-pointer flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98]"
-        >
-          <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">Add Budget</span>
-          <span className="sm:hidden">Add</span>
-        </button>
+        <AddBudgetDialog
+          budget={editingBudget}
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+          onSuccess={handleDialogSuccess}
+        />
+        {!isDialogOpen && (
+          <button
+            onClick={handleAddBudget}
+            className="cursor-pointer flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98]"
+          >
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Add Budget</span>
+            <span className="sm:hidden">Add</span>
+          </button>
+        )}
       </div>
 
       <div className="rounded-[var(--radius-lg)] bg-card p-4 sm:p-6 shadow-sm border border-border">
@@ -120,58 +134,60 @@ const BudgetPage = () => {
           </div>
         </div>
 
-        <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs sm:text-sm font-medium text-foreground">
-              Overall Progress
-            </span>
-            <span className="text-xs sm:text-sm font-semibold text-muted-foreground">
-              {overallPercentage.toFixed(1)}%
-            </span>
-          </div>
-          <div className="h-3 bg-background rounded-full overflow-hidden">
-            <div
-              className={cn(
-                "h-full transition-all duration-300 rounded-full",
-                overallPercentage > 90 ? "bg-danger" : "bg-primary"
-              )}
-              style={{ width: `${Math.min(overallPercentage, 100)}%` }}
-            />
-          </div>
-          {overallPercentage > 90 && (
-            <div className="flex items-center gap-1.5 mt-2 text-xs text-danger">
-              <AlertTriangle className="h-3 w-3" />
-              <span>You&#39;re close to your budget limit</span>
+        {totalBudget > 0 && (
+          <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs sm:text-sm font-medium text-foreground">
+                Overall Progress
+              </span>
+              <span className="text-xs sm:text-sm font-semibold text-muted-foreground">
+                {overallPercentage.toFixed(1)}%
+              </span>
             </div>
-          )}
-        </div>
+            <div className="h-3 bg-background rounded-full overflow-hidden">
+              <div
+                className={cn(
+                  "h-full transition-all duration-300 rounded-full",
+                  overallPercentage > DANGER_BUDGET_THRESHOLD ? "bg-danger" : "bg-primary"
+                )}
+                style={{ width: `${Math.min(overallPercentage, 100)}%` }}
+              />
+            </div>
+            {overallPercentage > DANGER_BUDGET_THRESHOLD && (
+              <div className="flex items-center gap-1.5 mt-2 text-xs text-danger">
+                <AlertTriangle className="h-3 w-3" />
+                <span>You&#39;re close to your budget limit</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-        {budgets.map((budget) => {
-          const percentage = (budget.spent / budget.total) * 100;
-          const isOverBudget = budget.spent > budget.total;
-          const isWarning = percentage > 80 && !isOverBudget;
-          const remaining = budget.total - budget.spent;
+        {budgetsSummary.map((summary) => {
+          const percentage = summary.usedPercentage;
+          const isOverBudget = summary.spent > summary.budget;
+          const isWarning = percentage > WARNING_BUDGET_THRESHOLD && !isOverBudget;
+          const remaining = summary.remaining;
 
           return (
             <div
-              key={budget.id}
+              key={summary.budgetId}
               className="rounded-[var(--radius-lg)] bg-card p-4 sm:p-6 shadow-sm border border-border hover:shadow-md transition-shadow"
             >
               <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div
-                    className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full text-lg sm:text-xl"
+                    className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full text-lg sm:text-xl shrink-0"
                     style={{
-                      backgroundColor: `${budget.category.color}20`,
+                      backgroundColor: `${summary.categoryColor}20`,
                     }}
                   >
-                    {budget.category.icon}
+                    {summary.categoryIcon}
                   </div>
-                  <div>
-                    <h3 className="text-sm sm:text-base font-semibold text-foreground">
-                      {budget.category.name}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm sm:text-base font-semibold text-foreground truncate">
+                      {summary.category}
                     </h3>
                     <p className="text-xs text-muted-foreground">
                       {isOverBudget
@@ -180,11 +196,27 @@ const BudgetPage = () => {
                     </p>
                   </div>
                 </div>
-                {isOverBudget && (
-                  <div className="p-1.5 rounded-full bg-danger/10">
-                    <AlertTriangle className="h-4 w-4 text-danger" />
-                  </div>
-                )}
+                <div className="flex items-center gap-1 shrink-0">
+                  {isOverBudget && (
+                    <div className="p-1.5 rounded-full bg-danger/10">
+                      <AlertTriangle className="h-4 w-4 text-danger" />
+                    </div>
+                  )}
+                  <button
+                    onClick={() => handleEditBudget(summary.budgetId)}
+                    className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                    title="Edit budget"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDeleteBudget(summary.budgetId)}
+                    className="p-1.5 rounded-lg hover:bg-danger/10 text-muted-foreground hover:text-danger transition-colors"
+                    title="Delete budget"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
 
               <div className="mb-4">
@@ -196,13 +228,13 @@ const BudgetPage = () => {
                       isOverBudget ? "text-danger" : "text-foreground"
                     )}
                   >
-                    {formatMoney(budget.spent, currencyCode)}
+                    {formatMoney(summary.spent, currencyCode)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-muted-foreground">Budget</span>
                   <span className="text-sm font-semibold text-foreground">
-                    {formatMoney(budget.total, currencyCode)}
+                    {formatMoney(summary.budget, currencyCode)}
                   </span>
                 </div>
               </div>
@@ -220,7 +252,7 @@ const BudgetPage = () => {
                         ? undefined
                         : isWarning
                         ? "#f59e0b"
-                        : budget.category.color,
+                        : summary.categoryColor,
                     }}
                   />
                 </div>
@@ -250,7 +282,7 @@ const BudgetPage = () => {
         })}
       </div>
 
-      {budgets.length === 0 && (
+      {budgetsSummary.length === 0 && (
         <div className="rounded-[var(--radius-lg)] bg-card p-8 sm:p-12 text-center border border-border">
           <div className="flex flex-col items-center gap-4">
             <div className="p-4 rounded-full bg-muted/50">

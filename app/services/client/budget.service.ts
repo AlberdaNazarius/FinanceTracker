@@ -1,29 +1,42 @@
 import axios from "axios";
 import {ApiRoutes} from "@/enum/api-routes";
-import {BudgetCreate, BudgetUpdate} from "@/types/budget";
+import {Budget, BudgetRequest} from "@/types/budget";
+import {BudgetSummary} from "@/types/budget-summary";
 
-const getBudgetView = async () => {
+const getBudgets = async (): Promise<{data: Budget[]}> => {
   const response = await axios.get(ApiRoutes.BUDGET);
   return response.data;
 }
 
-const createBudget = async (budgetData: BudgetCreate) => {
+const getBudgetById = async (budgetId: string): Promise<Budget> => {
+  const response = await axios.get(`${ApiRoutes.BUDGET}/${budgetId}`);
+  return response.data.data;
+}
+
+const getBudgetSummary = async (): Promise<BudgetSummary[]> => {
+  const response = await axios.get(ApiRoutes.BUDGET_SUMMARY);
+  return response.data.data;
+}
+
+const createBudget = async (budgetData: BudgetRequest) => {
   const response = await axios.post(ApiRoutes.BUDGET, budgetData);
   return response.data;
 }
 
-const updateBudget = async (budgetId: number, budgetData: BudgetUpdate) => {
+const updateBudget = async (budgetId: string, budgetData: BudgetRequest) => {
   const response = await axios.put(`${ApiRoutes.BUDGET}/${budgetId}`, budgetData);
   return response.data;
 }
 
-const deleteBudget = async (budgetId: number) => {
+const deleteBudget = async (budgetId: string) => {
   const response = await axios.delete(`${ApiRoutes.BUDGET}/${budgetId}`);
   return response.data;
 }
 
 export const BudgetService = {
-  getBudgetView,
+  getBudgets,
+  getBudgetById,
+  getBudgetSummary,
   createBudget,
   updateBudget,
   deleteBudget

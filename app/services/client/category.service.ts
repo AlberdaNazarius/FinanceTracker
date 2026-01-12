@@ -1,8 +1,8 @@
 import axios from "axios";
 import {ApiRoutes} from "@/enum/api-routes";
-import {CategoryCreate} from "@/types/category";
+import {Category, CategoryCreate} from "@/types/category";
 
-const getCategories = async () => {
+const getCategories = async (): Promise<{data: Category[]}> => {
   const response = await axios.get(ApiRoutes.CATEGORY);
   return response.data;
 }
