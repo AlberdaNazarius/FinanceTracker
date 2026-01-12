@@ -31,8 +31,8 @@ const BudgetPage = () => {
   const handleEditBudget = async (budgetId: string) => {
     const editingBudget = await BudgetService.getBudgetById(budgetId);
 
-    setEditingBudget(editingBudget);
     setIsDialogOpen(true);
+    setEditingBudget(editingBudget);
   };
 
   const handleDeleteBudget = useCallback(
@@ -204,14 +204,14 @@ const BudgetPage = () => {
                   )}
                   <button
                     onClick={() => handleEditBudget(summary.budgetId)}
-                    className="p-1.5 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
+                    className="cursor-pointer p-1.5 rounded-lg hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
                     title="Edit budget"
                   >
                     <Edit2 className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => handleDeleteBudget(summary.budgetId)}
-                    className="p-1.5 rounded-lg hover:bg-danger/10 text-muted-foreground hover:text-danger transition-colors"
+                    className="cursor-pointer p-1.5 rounded-lg hover:bg-danger/10 text-muted-foreground hover:text-danger transition-colors"
                     title="Delete budget"
                   >
                     <Trash2 className="h-4 w-4" />

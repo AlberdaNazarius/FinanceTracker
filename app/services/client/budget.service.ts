@@ -19,12 +19,22 @@ const getBudgetSummary = async (): Promise<BudgetSummary[]> => {
 }
 
 const createBudget = async (budgetData: BudgetRequest) => {
-  const response = await axios.post(ApiRoutes.BUDGET, budgetData);
+  const response = await axios.post(ApiRoutes.BUDGET, {
+    category_id: budgetData.categoryId,
+    amount: budgetData.amount,
+    period_start: budgetData.periodStart,
+    period_end: budgetData.periodEnd
+  });
   return response.data;
 }
 
 const updateBudget = async (budgetId: string, budgetData: BudgetRequest) => {
-  const response = await axios.put(`${ApiRoutes.BUDGET}/${budgetId}`, budgetData);
+  const response = await axios.put(`${ApiRoutes.BUDGET}/${budgetId}`, {
+    category_id: budgetData.categoryId,
+    amount: budgetData.amount,
+    period_start: budgetData.periodStart,
+    period_end: budgetData.periodEnd
+  });
   return response.data;
 }
 

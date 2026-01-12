@@ -106,11 +106,11 @@ const AddBudgetDialog: React.FC<Props> = ({ budget, open: controlledOpen, onOpen
           {({ values, handleChange, handleSubmit, setFieldValue, touched, errors }) => (
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="category_id">Category</Label>
+                <Label htmlFor="categoryId">Category</Label>
                 <Select
-                  name="category_id"
+                  name="categoryId"
                   value={values.categoryId}
-                  onValueChange={(val) => setFieldValue("category_id", val)}
+                  onValueChange={(val) => setFieldValue("categoryId", val)}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a category" />
@@ -155,9 +155,9 @@ const AddBudgetDialog: React.FC<Props> = ({ budget, open: controlledOpen, onOpen
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="period_start">Period Start</Label>
+                <Label htmlFor="periodStart">Period Start</Label>
                 <Input
-                  id="period_start"
+                  id="periodStart"
                   type="date"
                   value={values.periodStart}
                   onChange={handleChange}
@@ -168,9 +168,9 @@ const AddBudgetDialog: React.FC<Props> = ({ budget, open: controlledOpen, onOpen
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="period_end">Period End</Label>
+                <Label htmlFor="periodEnd">Period End</Label>
                 <Input
-                  id="period_end"
+                  id="periodEnd"
                   type="date"
                   value={values.periodEnd}
                   onChange={handleChange}
