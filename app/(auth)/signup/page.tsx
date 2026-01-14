@@ -11,6 +11,8 @@ import { schema } from "./schema";
 import { useRouter } from "next/navigation";
 import { AuthService } from "@/service/client/auth.service";
 import { Routes } from "@/enum/routes";
+import type React from "react";
+import Logo from "@/components/common/logo/logo";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -34,27 +36,16 @@ export default function SignUpPage() {
 
   return (
     <div className="w-full max-w-md">
-      {/* Logo */}
-      {/*TODO make this a component*/}
-      <div className="flex justify-center mb-6">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
-            <CircleDollarSign className="h-7 w-7 text-primary-foreground" />
-          </div>
-          <span className="text-3xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            FinTrack
-          </span>
-        </Link>
-      </div>
+      <Logo />
+      <div className='py-3'></div>
 
-      {/* Sign Up Card */}
       <Card className="py-0 sm:py-6 bg-transparent shadow-none border-none sm:bg-white sm:shadow-xl sm:border-border/50">
         <CardHeader className='hidden sm:block'>
           <CardTitle className="text-2xl font-bold">
             Create an account
           </CardTitle>
         </CardHeader>
-        <CardContent className='px-4 sm:px-6'>
+        <CardContent className='px-6'>
           <Formik
             initialValues={formInitState}
             validationSchema={schema}
@@ -191,7 +182,6 @@ export default function SignUpPage() {
             </Button>
           </div>
 
-          {/* Sign In Link */}
           <p className="mt-6 text-center text-sm text-muted-foreground">
             <span className="mr-2">Already have an account?</span>
             <Link
