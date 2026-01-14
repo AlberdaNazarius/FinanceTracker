@@ -48,12 +48,12 @@ export default function LoginPage() {
       </div>
 
       {/* Login Card */}
-      <Card className="border-border/50 shadow-xl">
-        <CardHeader>
+      <Card className="py-0 sm:py-6 bg-transparent shadow-none border-none sm:bg-white sm:shadow-xl sm:border-border/50">
+        <CardHeader className='px-6 hidden sm:block'>
           <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
           <CardDescription>Sign in to your account to continue</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className='px-4 sm:px-6'>
           <Formik
             initialValues={formInitState}
             validationSchema={schema}
@@ -117,7 +117,7 @@ export default function LoginPage() {
               <div className="w-full border-t border-border"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-card px-3 text-muted-foreground">
+              <span className="bg-[#F8F8F8FF] sm:bg-card px-3 text-muted-foreground">
                 Or continue with
               </span>
             </div>

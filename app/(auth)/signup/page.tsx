@@ -35,6 +35,7 @@ export default function SignUpPage() {
   return (
     <div className="w-full max-w-md">
       {/* Logo */}
+      {/*TODO make this a component*/}
       <div className="flex justify-center mb-6">
         <Link href="/" className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
@@ -47,13 +48,13 @@ export default function SignUpPage() {
       </div>
 
       {/* Sign Up Card */}
-      <Card className="border-border/50 shadow-xl gap-3">
-        <CardHeader>
+      <Card className="py-0 sm:py-6 bg-transparent shadow-none border-none sm:bg-white sm:shadow-xl sm:border-border/50">
+        <CardHeader className='hidden sm:block'>
           <CardTitle className="text-2xl font-bold">
             Create an account
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className='px-4 sm:px-6'>
           <Formik
             initialValues={formInitState}
             validationSchema={schema}
@@ -149,7 +150,7 @@ export default function SignUpPage() {
               <div className="w-full border-t border-border"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-card px-3 text-muted-foreground">
+              <span className="bg-[#F8F8F8FF] sm:bg-card px-3 text-muted-foreground">
                 Or continue with
               </span>
             </div>
