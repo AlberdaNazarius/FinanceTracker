@@ -3,7 +3,7 @@
 import { useMemo } from "react";
 import { AlertTriangle } from "lucide-react";
 import { useBudgetSummary } from "@/hooks/use-budget-summary";
-import { formatMoney, cn } from "@/helpers/utils";
+import {formatMoney, cn, calculateBudgetTotals} from "@/helpers/utils";
 import useUserStore from "@/store/user-store";
 import { WARNING_BUDGET_THRESHOLD, DANGER_BUDGET_THRESHOLD } from "@/helpers/constants";
 
@@ -18,13 +18,15 @@ const BudgetOverview = () => {
       .slice(0, 4);
   }, [budgetsSummary]);
 
-  const totalBudget = budgetsSummary.reduce((sum, b) => sum + b.budget, 0);
-  const totalSpent = budgetsSummary.reduce((sum, b) => sum + b.spent, 0);
-  const totalRemaining = budgetsSummary.reduce((sum, b) => sum + b.remaining, 0);
-  const overallPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
-  const isOverBudget = totalSpent > totalBudget;
+  const {
+    totalBudget,
+    totalSpent,
+    totalRemaining,
+    overallPercentage,
+    isOverBudget
+  } = calculateBudgetTotals(budgetsSummary);
 
-  const isWarning = overallPercentage > WARNING_BUDGET_THRESHOLD && !isOverBudget;
+  //const isWarning = overallPercentage > WARNING_BUDGET_THRESHOLD && !isOverBudget;
   const isDanger = overallPercentage > DANGER_BUDGET_THRESHOLD && !isOverBudget;
 
   if (loading) {

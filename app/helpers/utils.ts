@@ -1,6 +1,7 @@
 import {clsx, type ClassValue} from "clsx"
 import {twMerge} from "tailwind-merge"
 import {DEFAULT_CURRENCY} from "@/helpers/constants";
+import {BudgetSummary} from "@/types/budget-summary";
 
 export const formatDate = (dateString: Date | null): string => {
   if (!dateString) return 'Unknown';
@@ -57,3 +58,22 @@ export const normalizeDateToInput = (value?: string | Date | null): string => {
 
   return value.split("T")[0];
 };
+
+export function calculateBudgetTotals(budgets: BudgetSummary[]) {
+  const totalBudget = budgets.reduce((sum, b) => sum + b.budget, 0);
+  const totalSpent = budgets.reduce((sum, b) => sum + b.spent, 0);
+  const totalRemaining = budgets.reduce((sum, b) => sum + b.remaining, 0);
+
+  const overallPercentage =
+    totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+
+  const isOverBudget = totalSpent > totalBudget;
+
+  return {
+    totalBudget,
+    totalSpent,
+    totalRemaining,
+    overallPercentage,
+    isOverBudget
+  };
+}

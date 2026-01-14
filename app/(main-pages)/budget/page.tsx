@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { Plus, Wallet, AlertTriangle } from "lucide-react";
-import { cn, formatMoney } from "@/helpers/utils";
+import {calculateBudgetTotals, cn, formatMoney} from "@/helpers/utils";
 import useUserStore from "@/store/user-store";
 import AddBudgetDialog from "@/components/page/budget/dialogs/add-budget-dialog/add-budget-dialog";
 import { BudgetService } from "@/service/client/budget.service";
@@ -19,11 +19,12 @@ const BudgetPage = () => {
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // TODO refactor move to utils
-  const totalBudget = budgetsSummary.reduce((sum, b) => sum + b.budget, 0);
-  const totalSpent = budgetsSummary.reduce((sum, b) => sum + b.spent, 0);
-  const remaining = budgetsSummary.reduce((sum, b) => sum + b.remaining, 0);
-  const overallPercentage = totalBudget > 0 ? (totalSpent / totalBudget) * 100 : 0;
+  const {
+    totalBudget,
+    totalSpent,
+    totalRemaining,
+    overallPercentage,
+  } = calculateBudgetTotals(budgetsSummary);
 
   const handleAddBudget = () => {
     setEditingBudget(null);
@@ -128,10 +129,10 @@ const BudgetPage = () => {
             <p
               className={cn(
                 "text-xl sm:text-2xl font-bold",
-                remaining >= 0 ? "text-success" : "text-danger"
+                totalRemaining >= 0 ? "text-success" : "text-danger"
               )}
             >
-              {formatMoney(remaining, currencyCode)}
+              {formatMoney(totalRemaining, currencyCode)}
             </p>
           </div>
         </div>
