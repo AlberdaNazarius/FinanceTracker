@@ -1,5 +1,10 @@
-import {NextResponse} from 'next/server';
-import {getSupabase, getSupabaseUser, jsonError} from "@/helpers/server-utils";
+import { NextResponse } from "next/server";
+import {
+  getSupabase,
+  getSupabaseUser,
+  jsonError,
+  handleApiError,
+} from "@/helpers/server-utils";
 
 export async function GET() {
   try {
@@ -15,14 +20,12 @@ export async function GET() {
       .order("transaction_date", {ascending: false});
 
     if (error) {
-      console.error("Transaction fetch error:", error);
       return jsonError(error.message, 400);
     }
 
-    return NextResponse.json({data}, {status: 200});
+    return NextResponse.json({ data }, { status: 200 });
   } catch (error) {
-    console.error("GET /transaction error:", error);
-    return jsonError("Unexpected server error", 500);
+    return handleApiError(error, "GET /transactions");
   }
 }
 
@@ -50,13 +53,15 @@ export async function POST(req: Request) {
       .single();
 
     if (error) {
-      console.error("Transaction create error:", error);
       return jsonError(error.message, 400);
     }
 
-    return NextResponse.json({data}, {status: 201});
+    return NextResponse.json({ data }, { status: 201 });
   } catch (error) {
-    console.error("POST /transaction error:", error);
-    return jsonError("Invalid request body", 400);
+    return handleApiError(
+      error,
+      "POST /transactions",
+      "Invalid request body"
+    );
   }
 }

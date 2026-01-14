@@ -1,14 +1,14 @@
 "use client";
 
-import {useState, useCallback} from "react";
-import {Plus, Wallet, AlertTriangle} from "lucide-react";
-import {cn, formatMoney} from "@/helpers/utils";
+import { useState, useCallback } from "react";
+import { Plus, Wallet, AlertTriangle } from "lucide-react";
+import { cn, formatMoney } from "@/helpers/utils";
 import useUserStore from "@/store/user-store";
 import AddBudgetDialog from "@/components/page/budget/dialogs/add-budget-dialog/add-budget-dialog";
-import {BudgetService} from "@/service/client/budget.service";
-import {useBudgetSummary} from "@/hooks/use-budget-summary";
-import {DANGER_BUDGET_THRESHOLD} from "@/helpers/constants";
-import {Budget} from "@/types/budget";
+import { BudgetService } from "@/service/client/budget.service";
+import { useBudgetSummary } from "@/hooks/use-budget-summary";
+import { DANGER_BUDGET_THRESHOLD } from "@/helpers/constants";
+import { Budget } from "@/types/budget";
 import BudgetDetailsCard from "@/components/page/budget/budget-details-card/budget-details-card";
 
 const BudgetPage = () => {
@@ -19,6 +19,7 @@ const BudgetPage = () => {
   const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  // TODO refactor move to utils
   const totalBudget = budgetsSummary.reduce((sum, b) => sum + b.budget, 0);
   const totalSpent = budgetsSummary.reduce((sum, b) => sum + b.spent, 0);
   const remaining = budgetsSummary.reduce((sum, b) => sum + b.remaining, 0);

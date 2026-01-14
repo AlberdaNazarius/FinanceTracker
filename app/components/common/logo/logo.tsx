@@ -1,5 +1,5 @@
 import Link from "next/link";
-import {CircleDollarSign} from "lucide-react";
+import { CircleDollarSign } from "lucide-react";
 import type React from "react";
 
 const Logo = () => {

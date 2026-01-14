@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import {getSupabaseUser, jsonError,} from "@/helpers/server-utils";
+import {
+  getSupabaseUser,
+  jsonError,
+  handleApiError,
+} from "@/helpers/server-utils";
 
 export async function GET() {
   try {
@@ -20,13 +24,11 @@ export async function GET() {
       .single();
 
     if (error) {
-      console.error("User profile fetch error:", error);
       return jsonError(error.message, 400);
     }
 
     return NextResponse.json({ data }, { status: 200 });
   } catch (error) {
-    console.error("GET /user error:", error);
-    return jsonError("Unexpected server error", 500);
+    return handleApiError(error, "GET /user");
   }
 }
