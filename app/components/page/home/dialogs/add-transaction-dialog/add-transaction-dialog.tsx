@@ -131,50 +131,52 @@ const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label>Type</Label>
-                <Select
-                  name='type'
-                  value={values.type}
-                  onValueChange={(val) => setFieldValue("type", val)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a type"/>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value={TransactionType.EXPENSE}>Expenses</SelectItem>
-                    <SelectItem value={TransactionType.INCOME}>Income</SelectItem>
-                  </SelectContent>
-                </Select>
-                {touched.type && errors.type && <p className="text-sm text-red-500 mt-1">{errors.type}</p>}
-              </div>
+              <div className='flex flex-col sm:flex-row gap-4'>
+                <div className="space-y-2 flex-1">
+                  <Label>Type</Label>
+                  <Select
+                    name='type'
+                    value={values.type}
+                    onValueChange={(val) => setFieldValue("type", val)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a type"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={TransactionType.EXPENSE}>Expenses</SelectItem>
+                      <SelectItem value={TransactionType.INCOME}>Income</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {touched.type && errors.type && <p className="text-sm text-red-500 mt-1">{errors.type}</p>}
+                </div>
 
-              <div className="space-y-2">
-                <Label>Category</Label>
-                <Select
-                  name='category_id'
-                  value={values?.category_id ?? ""}
-                  onValueChange={(val) =>
-                    setFieldValue("category_id", val)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a category"/>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {groupedCategories[values.type]?.map((category) => (
-                      <SelectItem key={category.id} value={category.id}>
-                        {category.name}
-                      </SelectItem>
-                    ))}
-                    {(!groupedCategories[values.type] || groupedCategories[values.type]?.length === 0) && (
-                      <div className="p-2 text-xs text-center text-muted-foreground">
-                        No {values.type} categories found
-                      </div>
-                    )}
-                  </SelectContent>
-                </Select>
-                {touched.category_id && errors.category_id &&
-                    <p className="text-sm text-red-500 mt-1">{errors.category_id}</p>}
+                <div className="space-y-2 flex-1">
+                  <Label>Category</Label>
+                  <Select
+                    name='category_id'
+                    value={values?.category_id ?? ""}
+                    onValueChange={(val) =>
+                      setFieldValue("category_id", val)}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a category"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {groupedCategories[values.type]?.map((category) => (
+                        <SelectItem key={category.id} value={category.id}>
+                          {category.name}
+                        </SelectItem>
+                      ))}
+                      {(!groupedCategories[values.type] || groupedCategories[values.type]?.length === 0) && (
+                        <div className="p-2 text-xs text-center text-muted-foreground">
+                          No {values.type} categories found
+                        </div>
+                      )}
+                    </SelectContent>
+                  </Select>
+                  {touched.category_id && errors.category_id &&
+                      <p className="text-sm text-red-500 mt-1">{errors.category_id}</p>}
+                </div>
               </div>
 
               <div className="space-y-2">

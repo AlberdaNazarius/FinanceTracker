@@ -2,22 +2,15 @@
 
 import TransactionTable from "@/components/page/transactions/transactions-table/transactions-table";
 import SearchBar from "@/components/general/search-bar/search-bar";
-import { useState, useMemo, useEffect } from "react";
-import { useDebounce } from "@/hooks/use-debounce";
-import { useTransactions } from "@/hooks/use-transactions";
-import { TransactionType } from "@/enum/transaction-type";
-import { Category } from "@/types/category";
-import { CategoryService } from "@/service/client/category.service";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/helpers/utils";
-
-type DateRange = "7d" | "30d" | "month" | "all";
+import {useEffect, useMemo, useState} from "react";
+import {useDebounce} from "@/hooks/use-debounce";
+import {useTransactions} from "@/hooks/use-transactions";
+import {TransactionType} from "@/enum/transaction-type";
+import {Category} from "@/types/category";
+import {CategoryService} from "@/service/client/category.service";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {cn} from "@/helpers/utils";
+import {DateRange} from "@/enum/date-range";
 
 const Transactions = () => {
   const { transactions, refetch } = useTransactions();
@@ -26,7 +19,7 @@ const Transactions = () => {
     "all"
   );
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedDateRange, setSelectedDateRange] = useState<DateRange>("7d");
+  const [selectedDateRange, setSelectedDateRange] = useState<DateRange>(DateRange.MONTH);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
 
@@ -60,20 +53,8 @@ const Transactions = () => {
     );
 
     switch (range) {
-      case "7d": {
-        const date = new Date(today);
-        date.setDate(date.getDate() - 7);
-        date.setHours(0, 0, 0, 0);
-        return date;
-      }
-      case "30d": {
-        const date = new Date(today);
-        date.setDate(date.getDate() - 30);
-        date.setHours(0, 0, 0, 0);
-        return date;
-      }
-      case "month": {
-        const date = new Date(
+      case DateRange.MONTH: {
+        return new Date(
           today.getFullYear(),
           today.getMonth(),
           1,
@@ -82,9 +63,8 @@ const Transactions = () => {
           0,
           0
         );
-        return date;
       }
-      case "all":
+      case DateRange.ALL:
         return null;
       default:
         return null;
@@ -205,19 +185,15 @@ const Transactions = () => {
               <SelectValue placeholder="Last 7 days" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem className='cursor-pointer' value="7d">Last 7 days</SelectItem>
-              <SelectItem className='cursor-pointer' value="30d">Last 30 days</SelectItem>
-              <SelectItem className='cursor-pointer' value="month">This month</SelectItem>
-              <SelectItem className='cursor-pointer' value="all">All time</SelectItem>
+              <SelectItem className='cursor-pointer' value={DateRange.MONTH}>This month</SelectItem>
+              <SelectItem className='cursor-pointer' value={DateRange.ALL}>All time</SelectItem>
             </SelectContent>
           </Select>
         </div>
       </div>
 
-      {/* Search Bar */}
       <SearchBar value={search} onChange={handleSearchChange} />
 
-      {/* Transactions Table */}
       <TransactionTable transactions={filteredTransactions} refetch={refetch} />
     </div>
   );

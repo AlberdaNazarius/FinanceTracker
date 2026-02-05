@@ -26,7 +26,6 @@
 - [Security](#-security)
 - [Performance](#-performance)
 - [Contributing](#-contributing)
-- [License](#-license)
 
 ---
 
