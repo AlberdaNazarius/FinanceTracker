@@ -11,6 +11,8 @@ import {CategoryService} from "@/service/client/category.service";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import {cn} from "@/helpers/utils";
 import {DateRange} from "@/enum/date-range";
+import PageHeader from "@/components/common/page-header/page-header";
+import AddTransactionDialog from "@/components/page/home/dialogs/add-transaction-dialog/add-transaction-dialog";
 
 const Transactions = () => {
   const { transactions, refetch } = useTransactions();
@@ -40,6 +42,7 @@ const Transactions = () => {
     fetchCategories();
   }, []);
 
+  // TODO move to utils
   const getDateRange = (range: DateRange): Date | null => {
     const now = new Date();
     const today = new Date(
@@ -53,6 +56,12 @@ const Transactions = () => {
     );
 
     switch (range) {
+      case DateRange.WEEK: {
+        const start = new Date(today);
+        start.setDate(start.getDate() - 6);
+        start.setHours(0, 0, 0, 0);
+        return start;
+      }
       case DateRange.MONTH: {
         return new Date(
           today.getFullYear(),
@@ -115,7 +124,13 @@ const Transactions = () => {
   };
 
   return (
-    <div className="w-full flex flex-col gap-3 sm:gap-4">
+    <div className="w-full flex flex-col gap-4 sm:gap-5">
+      <PageHeader
+        title="Transactions"
+        subtitle="Browse and manage your activity"
+        action={<AddTransactionDialog onSuccess={refetch} />}
+      />
+
       {/* Filters */}
       <div className="flex flex-col md:flex-row justify-between gap-3 sm:gap-4">
         {/* Transaction Type Filter */}
@@ -181,10 +196,11 @@ const Transactions = () => {
             value={selectedDateRange}
             onValueChange={(value) => setSelectedDateRange(value as DateRange)}
           >
-            <SelectTrigger className="cursor-pointer w-full sm:w-[160px]">
-              <SelectValue placeholder="Last 7 days" />
+            <SelectTrigger className="cursor-pointer w-full sm:w-40">
+              <SelectValue placeholder="This month" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem className='cursor-pointer' value={DateRange.WEEK}>Last 7 days</SelectItem>
               <SelectItem className='cursor-pointer' value={DateRange.MONTH}>This month</SelectItem>
               <SelectItem className='cursor-pointer' value={DateRange.ALL}>All time</SelectItem>
             </SelectContent>

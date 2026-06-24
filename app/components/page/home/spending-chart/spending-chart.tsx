@@ -1,11 +1,11 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { useTransactions } from "@/hooks/use-transactions"
 import useUserStore from "@/store/user-store"
 import { TransactionType } from "@/enum/transaction-type"
 import { formatMoney } from "@/helpers/utils"
 import { ResponseTransaction } from "@/types/response/response-transaction"
+import { Skeleton } from "@/components/ui/skeleton"
 
 type CategorySpending = {
   id: string
@@ -16,15 +16,12 @@ type CategorySpending = {
 }
 
 type SpendingChartProps = {
-  transactions?: ResponseTransaction[]
+  transactions: ResponseTransaction[]
   loading?: boolean
 }
 
-const SpendingChart = ({ transactions: propTransactions, loading: propLoading }: SpendingChartProps = {}) => {
+const SpendingChart = ({ transactions, loading = false }: SpendingChartProps) => {
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
-  const hookData = useTransactions()
-  const transactions = propTransactions ?? hookData.transactions
-  const loading = propLoading ?? hookData.loading
   const user = useUserStore(state => state.user)
   const currencyCode = user?.preferredCurrency?.code
 
@@ -89,8 +86,16 @@ const SpendingChart = ({ transactions: propTransactions, loading: propLoading }:
       </div>
 
       {loading ? (
-        <div className="py-8 text-center text-muted-foreground">
-          Loading...
+        <div className="space-y-3 sm:space-y-4">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i}>
+              <div className="flex items-center justify-between mb-1.5 sm:mb-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-16" />
+              </div>
+              <Skeleton className="h-2.5 sm:h-3 w-full rounded-full" />
+            </div>
+          ))}
         </div>
       ) : categorySpending.length === 0 ? (
         <div className="py-8 text-center text-muted-foreground">

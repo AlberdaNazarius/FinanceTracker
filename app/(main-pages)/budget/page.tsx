@@ -10,6 +10,11 @@ import { useBudgetSummary } from "@/hooks/use-budget-summary";
 import { DANGER_BUDGET_THRESHOLD } from "@/helpers/constants";
 import { Budget } from "@/types/budget";
 import BudgetDetailsCard from "@/components/page/budget/budget-details-card/budget-details-card";
+import PageHeader from "@/components/common/page-header/page-header";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "@/store/toast-store";
+import { confirm } from "@/store/confirm-store";
 
 const BudgetPage = () => {
   const user = useUserStore((state) => state.user);
@@ -40,13 +45,21 @@ const BudgetPage = () => {
 
   const handleDeleteBudget = useCallback(
     async (budgetId: string) => {
-      if (!confirm("Are you sure you want to delete this budget?")) return;
+      const confirmed = await confirm({
+        title: "Delete budget?",
+        description: "This budget will be permanently removed.",
+        confirmText: "Delete",
+        destructive: true,
+      });
+      if (!confirmed) return;
 
       try {
         await BudgetService.deleteBudget(budgetId);
+        toast.success("Budget deleted");
         await refetch();
       } catch (error) {
         console.error("Failed to delete budget:", error);
+        toast.error("Failed to delete budget");
       }
     },
     [refetch]
@@ -60,40 +73,37 @@ const BudgetPage = () => {
 
   if (loading) {
     return (
-      <div className="w-full flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Loading budgets...</p>
+      <div className="w-full space-y-4 sm:space-y-6">
+        <Skeleton className="h-9 w-40" />
+        <Skeleton className="h-40 w-full rounded-lg" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {[0, 1, 2].map((i) => (
+            <Skeleton key={i} className="h-44 w-full rounded-lg" />
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
     <div className="w-full space-y-4 sm:space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
-            Budget
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Manage your monthly spending limits
-          </p>
-        </div>
-        <AddBudgetDialog
-          budget={editingBudget}
-          open={isDialogOpen}
-          onOpenChange={setIsDialogOpen}
-          onSuccess={handleDialogSuccess}
-        />
-        {!isDialogOpen && (
-          <button
-            onClick={handleAddBudget}
-            className="cursor-pointer flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-all duration-200 shadow-md hover:shadow-lg active:scale-[0.98]"
-          >
-            <Plus className="h-4 w-4"/>
+      <PageHeader
+        title="Budget"
+        subtitle="Manage your monthly spending limits"
+        action={
+          <Button onClick={handleAddBudget} className="cursor-pointer">
+            <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Add Budget</span>
             <span className="sm:hidden">Add</span>
-          </button>
-        )}
-      </div>
+          </Button>
+        }
+      />
+      <AddBudgetDialog
+        budget={editingBudget}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onSuccess={handleDialogSuccess}
+      />
 
       <div className="rounded-[var(--radius-lg)] bg-card p-4 sm:p-6 shadow-sm border border-border">
         <div className="flex items-center gap-3 mb-4 sm:mb-6">
