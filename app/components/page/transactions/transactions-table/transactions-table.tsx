@@ -12,7 +12,9 @@ import {
 import { TransactionType } from "@/enum/transaction-type";
 import EditTransactionDialog from "@/components/page/transactions/dialogs/edit-transaction-dialog/edit-transaction-dialog";
 import { ResponseTransaction } from "@/types/response/response-transaction";
-import { ArrowUpCircle, ArrowDownCircle } from "lucide-react";
+import { ArrowUpCircle, ArrowDownCircle, Trash2 } from "lucide-react";
+import { toast } from "@/store/toast-store";
+import { confirm } from "@/store/confirm-store";
 
 type TransactionTableProps = {
   transactions: ResponseTransaction[];
@@ -24,11 +26,21 @@ const TransactionTable = ({ transactions, refetch }: TransactionTableProps) => {
     async (id?: string) => {
       if (!id) return;
 
+      const confirmed = await confirm({
+        title: "Delete transaction?",
+        description: "This transaction will be permanently removed.",
+        confirmText: "Delete",
+        destructive: true,
+      });
+      if (!confirmed) return;
+
       try {
         await TransactionService.deleteTransaction(id);
+        toast.success("Transaction deleted");
         await refetch();
       } catch (error) {
         console.error("Failed to delete transaction:", error);
+        toast.error("Failed to delete transaction");
       }
     },
     [refetch]
@@ -191,8 +203,9 @@ const TransactionTable = ({ transactions, refetch }: TransactionTableProps) => {
                       />
                       <button
                         onClick={() => handleDelete(transaction?.id)}
-                        className="cursor-pointer flex-1 sm:flex-none px-4 py-2.5 bg-card text-danger border border-danger/30 rounded-lg text-sm font-semibold hover:bg-danger/10 active:scale-[0.98] transition-all"
+                        className="cursor-pointer flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-card text-danger border border-danger/30 rounded-lg text-sm font-semibold hover:bg-danger/10 active:scale-[0.98] transition-all"
                       >
+                        <Trash2 className="h-4 w-4" />
                         Delete
                       </button>
                     </div>

@@ -21,7 +21,7 @@ const Layout = async ({
     <>
       <LoadUserToStore user={user} />
       <Header />
-      <div className="flex mt-4 items-center justify-center px-2 mx-auto max-w-7xl pb-20 md:pb-4">
+      <div className="flex mt-4 items-start justify-center px-2 sm:px-4 mx-auto max-w-7xl pb-20 md:pb-8">
         {children}
       </div>
       <BottomNav />

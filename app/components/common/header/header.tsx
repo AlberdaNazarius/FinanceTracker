@@ -13,6 +13,7 @@ import {
 import {Button} from "@/components/ui/button";
 import {useRouter, usePathname} from "next/navigation";
 import {cn} from "@/helpers/utils";
+import ThemeToggle from "@/components/common/theme-toggle/theme-toggle";
 
 export default function Header() {
   const {user} = useUserStore();
@@ -71,7 +72,8 @@ export default function Header() {
           </nav>
 
           {/* User Menu */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <ThemeToggle />
             {user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
