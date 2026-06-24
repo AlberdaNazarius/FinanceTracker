@@ -17,6 +17,8 @@ import {RequestTransaction} from "@/types/request/request-transaction";
 import useUserStore from "@/store/user-store";
 import {getCurrencySymbol, normalizeDateToInput} from "@/helpers/utils";
 import {ResponseTransaction} from "@/types/response/response-transaction";
+import {toast} from "@/store/toast-store";
+import {SquarePen} from "lucide-react";
 
 type Props = {
   transaction: ResponseTransaction;
@@ -60,8 +62,15 @@ const EditTransactionDialog: React.FC<Props> = ({transaction, onSuccess}) => {
       description: values.description ? values.description : 'General transaction',
       transaction_date: new Date(values.transaction_date)
     }
-    await TransactionService.updateTransaction(transaction.id, newTransaction);
-    onSuccess?.();
+
+    try {
+      await TransactionService.updateTransaction(transaction.id, newTransaction);
+      toast.success("Transaction updated");
+      onSuccess?.();
+    } catch (error) {
+      console.error("Failed to update transaction:", error);
+      toast.error("Failed to update transaction");
+    }
   }
 
   useEffect(() => {
@@ -102,9 +111,11 @@ const EditTransactionDialog: React.FC<Props> = ({transaction, onSuccess}) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        className="bg-primary font-semibold text-white px-4 py-2 rounded-md hover:bg-primary-dark transition-colors cursor-pointer">
-        Edit Transaction
+      <DialogTrigger asChild>
+        <Button variant="outline" className="flex-1 cursor-pointer sm:flex-none">
+          <SquarePen className="h-4 w-4" />
+          Edit
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>

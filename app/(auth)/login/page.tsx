@@ -55,7 +55,7 @@ export default function LoginPage() {
       <Logo />
       <div className="py-4"></div>
 
-      <Card className="py-0 sm:py-6 bg-transparent shadow-none border-none sm:bg-white sm:shadow-xl sm:border-border/50">
+      <Card className="py-0 sm:py-6 bg-transparent shadow-none border-none sm:bg-card sm:shadow-xl sm:border-border/50">
         <CardHeader className="px-6 hidden sm:block">
           <CardTitle className="text-2xl font-bold">Welcome back</CardTitle>
           <CardDescription>Sign in to your account to continue</CardDescription>

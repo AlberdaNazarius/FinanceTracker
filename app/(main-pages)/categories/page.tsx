@@ -5,6 +5,12 @@ import {Category} from "@/types/category";
 import {CategoryService} from "@/service/client/category.service";
 import CategoryList from "@/components/page/categories/category-list/category-list";
 import AddCategoryDialog from "@/components/page/categories/dialogs/add-category-dialog/add-category-dialog";
+import PageHeader from "@/components/common/page-header/page-header";
+import {Button} from "@/components/ui/button";
+import {Plus} from "lucide-react";
+import {toast} from "@/store/toast-store";
+import {confirm} from "@/store/confirm-store";
+import {Skeleton} from "@/components/ui/skeleton";
 
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -58,69 +64,87 @@ export default function CategoriesPage() {
   }
 
   const handleDelete = useCallback(async (id: string) => {
+    const confirmed = await confirm({
+      title: "Delete category?",
+      description: "This category will be permanently removed.",
+      confirmText: "Delete",
+      destructive: true,
+    });
+    if (!confirmed) return;
+
     const prev = categories;
     setCategories(prev.filter(c => c.id !== id));
 
     try {
       await CategoryService.deleteCategory(id)
+      toast.success("Category deleted");
     } catch (err) {
       console.error(err);
       setCategories(prev);
+      toast.error("Failed to delete category");
     }
   }, [categories])
 
   const handleSave = async (category: Category) => {
     const { id, ...categoryBody } = category;
+    const prev = categories;
 
-    if (editingCategory) {
-      setCategories(prev =>
-        prev.map(c => (c.id === id ? category : c))
-      )
+    try {
+      if (editingCategory) {
+        setCategories(p => p.map(c => (c.id === id ? category : c)));
+        await CategoryService.updateCategory(id, categoryBody);
+        toast.success("Category updated");
+      } else {
+        const tempId = crypto.randomUUID();
+        const optimisticCategory = { ...categoryBody, id: tempId };
 
-      await CategoryService.updateCategory(id, categoryBody);
-    } else {
-      const tempId = crypto.randomUUID();
-      const optimisticCategory = { ...categoryBody, id: tempId };
+        setCategories(p => [...p, optimisticCategory]);
+        const { data } = await CategoryService.addCategory(categoryBody);
 
-      setCategories(prev => [...prev, optimisticCategory]);
-      const { data } = await CategoryService.addCategory(categoryBody);
-
-      setCategories(prev =>
-        prev.map(c => (c.id === tempId ? data : c))
-      );
+        setCategories(p => p.map(c => (c.id === tempId ? data : c)));
+        toast.success("Category created");
+      }
+      setIsDialogOpen(false);
+    } catch (err) {
+      console.error(err);
+      setCategories(prev);
+      toast.error("Failed to save category");
     }
-
-    setIsDialogOpen(false);
   }
 
   /** ---------------- Render ---------------- */
-  if (isLoading) {
-    return <p className="text-muted font-semibold">Loading categories…</p>
-  }
-
   if (error) {
-    return <p className="text-red-500">{error}</p>
+    return <p className="text-danger">{error}</p>
   }
 
   return (
     <div className="w-full">
-      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-0">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Categories</h1>
-          <p className="text-sm text-muted font-semibold mt-1">Manage your income and expense categories</p>
-        </div>
-        <button
-          onClick={handleAddNew}
-          className="cursor-pointer justify-center flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
-        >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4"/>
-          </svg>
-          <span className="hidden sm:inline">Add Category</span>
-          <span className="sm:hidden">Add</span>
-        </button>
+      <div className="mb-6">
+        <PageHeader
+          title="Categories"
+          subtitle="Manage your income and expense categories"
+          action={
+            <Button onClick={handleAddNew} className="cursor-pointer">
+              <Plus className="h-4 w-4" />
+              <span className="hidden sm:inline">Add Category</span>
+              <span className="sm:hidden">Add</span>
+            </Button>
+          }
+        />
       </div>
 
+      {isLoading ? (
+        <div className="grid gap-6 lg:grid-cols-2">
+          {[0, 1].map((col) => (
+            <div key={col} className="space-y-2">
+              <Skeleton className="mb-4 h-6 w-40" />
+              {[0, 1, 2].map((row) => (
+                <Skeleton key={row} className="h-[72px] w-full rounded-lg" />
+              ))}
+            </div>
+          ))}
+        </div>
+      ) : (
       <div className="grid gap-6 lg:grid-cols-2">
         <CategoryList
           title="Income Categories"
@@ -138,6 +162,7 @@ export default function CategoriesPage() {
           onDelete={handleDelete}
         />
       </div>
+      )}
 
       {isDialogOpen && (
         <AddCategoryDialog

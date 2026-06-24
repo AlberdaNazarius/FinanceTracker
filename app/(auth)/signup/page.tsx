@@ -50,7 +50,7 @@ export default function SignUpPage() {
       <Logo />
       <div className='py-3'></div>
 
-      <Card className="py-0 sm:py-6 bg-transparent shadow-none border-none sm:bg-white sm:shadow-xl sm:border-border/50">
+      <Card className="py-0 sm:py-6 bg-transparent shadow-none border-none sm:bg-card sm:shadow-xl sm:border-border/50">
         <CardHeader className='hidden sm:block'>
           <CardTitle className="text-2xl font-bold">
             Create an account

@@ -6,6 +6,7 @@ import { useBudgetSummary } from "@/hooks/use-budget-summary";
 import {formatMoney, cn, calculateBudgetTotals} from "@/helpers/utils";
 import useUserStore from "@/store/user-store";
 import { WARNING_BUDGET_THRESHOLD, DANGER_BUDGET_THRESHOLD } from "@/helpers/constants";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const BudgetOverview = () => {
   const user = useUserStore((state) => state.user);
@@ -31,12 +32,20 @@ const BudgetOverview = () => {
 
   if (loading) {
     return (
-      <div className="rounded-[var(--radius-lg)] bg-card p-4 sm:p-6 shadow-sm border border-border">
+      <div className="rounded-lg bg-card p-4 sm:p-6 shadow-sm border border-border">
         <h3 className="text-base sm:text-lg font-semibold text-foreground mb-4 sm:mb-6">
           Budget Overview
         </h3>
-        <div className="flex items-center justify-center py-8">
-          <p className="text-sm text-muted-foreground">Loading budgets...</p>
+        <div className="space-y-4 sm:space-y-5">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i}>
+              <div className="flex items-center gap-2 mb-1.5 sm:mb-2">
+                <Skeleton className="h-6 w-6 sm:h-7 sm:w-7 rounded-full" />
+                <Skeleton className="h-4 flex-1" />
+              </div>
+              <Skeleton className="h-2 w-full rounded-full" />
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -44,7 +53,7 @@ const BudgetOverview = () => {
 
   if (budgetsSummary.length === 0) {
     return (
-      <div className="rounded-[var(--radius-lg)] bg-card p-4 sm:p-6 shadow-sm border border-border">
+      <div className="rounded-lg bg-card p-4 sm:p-6 shadow-sm border border-border">
         <h3 className="text-base sm:text-lg font-semibold text-foreground mb-4 sm:mb-6">
           Budget Overview
         </h3>
@@ -61,7 +70,7 @@ const BudgetOverview = () => {
   }
 
   return (
-    <div className="rounded-[var(--radius-lg)] bg-card p-4 sm:p-6 shadow-sm border border-border">
+    <div className="rounded-lg bg-card p-4 sm:p-6 shadow-sm border border-border">
       <h3 className="text-base sm:text-lg font-semibold text-foreground mb-4 sm:mb-6">
         Budget Overview
       </h3>

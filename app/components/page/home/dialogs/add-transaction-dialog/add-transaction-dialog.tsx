@@ -16,6 +16,8 @@ import {CURRENCIES} from "@/helpers/constants";
 import {RequestTransaction} from "@/types/request/request-transaction";
 import useUserStore from "@/store/user-store";
 import {getCurrencySymbol} from "@/helpers/utils";
+import {toast} from "@/store/toast-store";
+import {Plus} from "lucide-react";
 
 type Props = {
   onSuccess?: () => void;
@@ -55,8 +57,15 @@ const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
       description: values.description ? values.description : 'General transaction',
       transaction_date: new Date(values.transaction_date)
     }
-    await TransactionService.addTransaction(newTransaction);
-    onSuccess?.();
+
+    try {
+      await TransactionService.addTransaction(newTransaction);
+      toast.success("Transaction added");
+      onSuccess?.();
+    } catch (error) {
+      console.error("Failed to add transaction:", error);
+      toast.error("Failed to add transaction");
+    }
   }
 
   useEffect(() => {
@@ -97,12 +106,12 @@ const AddTransactionDialog: React.FC<Props> = ({onSuccess}) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger
-        className="w-full bg-primary font-semibold text-primary-foreground px-6 py-3.5 rounded-lg hover:bg-primary/90 transition-all duration-200 cursor-pointer shadow-md hover:shadow-lg active:scale-[0.98] flex items-center justify-center gap-2">
-        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-        </svg>
-        Add Transaction
+      <DialogTrigger asChild>
+        <Button className="cursor-pointer">
+          <Plus className="h-4 w-4" />
+          <span className="hidden sm:inline">Add Transaction</span>
+          <span className="sm:hidden">Add</span>
+        </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
