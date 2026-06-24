@@ -16,7 +16,7 @@ const BalanceCard: React.FC<BalanceCardProps> = ({
   preferredCurrency,
 }) => {
   return (
-    <div className="relative overflow-hidden rounded-[var(--radius-lg)] bg-gradient-to-br from-primary/95 via-primary/85 to-primary/75 p-6 sm:p-8 shadow-lg border border-primary/20">
+    <div className="relative overflow-hidden rounded-lg bg-linear-to-br from-primary/95 via-primary/85 to-primary/75 p-6 sm:p-8 shadow-lg border border-primary/20">
       <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16" />
       <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12" />
 

@@ -105,7 +105,7 @@ const BudgetPage = () => {
         onSuccess={handleDialogSuccess}
       />
 
-      <div className="rounded-[var(--radius-lg)] bg-card p-4 sm:p-6 shadow-sm border border-border">
+      <div className="rounded-lg bg-card p-4 sm:p-6 shadow-sm border border-border">
         <div className="flex items-center gap-3 mb-4 sm:mb-6">
           <div className="p-2 rounded-lg bg-primary/10">
             <Wallet className="h-5 w-5 text-primary"/>
@@ -188,7 +188,7 @@ const BudgetPage = () => {
       </div>
 
       {budgetsSummary.length === 0 && (
-        <div className="rounded-[var(--radius-lg)] bg-card p-8 sm:p-12 text-center border border-border">
+        <div className="rounded-lg bg-card p-8 sm:p-12 text-center border border-border">
           <div className="flex flex-col items-center gap-4">
             <div className="p-4 rounded-full bg-gray-200">
               <Wallet className="h-8 w-8 text-muted-foreground"/>

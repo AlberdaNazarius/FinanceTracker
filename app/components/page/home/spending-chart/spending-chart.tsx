@@ -75,7 +75,7 @@ const SpendingChart = ({ transactions, loading = false }: SpendingChartProps) =>
   const totalSpending = categorySpending.reduce((sum, cat) => sum + cat.amount, 0)
 
   return (
-    <div className="rounded-[var(--radius-lg)] bg-card p-4 sm:p-6 shadow-sm border border-border">
+    <div className="rounded-lg bg-card p-4 sm:p-6 shadow-sm border border-border">
       <div className="flex items-center justify-between mb-4 sm:mb-6">
         <div>
           <h3 className="text-base sm:text-lg font-semibold text-foreground">Spending by Category</h3>
@@ -133,7 +133,7 @@ const SpendingChart = ({ transactions, loading = false }: SpendingChartProps) =>
 
           <div className="flex flex-wrap gap-3 sm:gap-4 pt-3 sm:pt-4 border-t border-border overflow-x-auto">
             {categorySpending.map((category) => (
-              <div key={category.id} className="flex items-center gap-2 flex-shrink-0">
+              <div key={category.id} className="flex items-center gap-2 shrink-0">
                 <div
                   className="h-3 w-3 rounded-full"
                   style={{ backgroundColor: category.color }}

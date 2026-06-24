@@ -27,7 +27,7 @@ const BudgetDetailsCard: React.FC<BudgetDetailsCardProps> = (
 
   return (
     <div
-      className="rounded-[var(--radius-lg)] bg-card p-4 sm:p-6 shadow-sm border border-border hover:shadow-md transition-shadow"
+      className="rounded-lg bg-card p-4 sm:p-6 shadow-sm border border-border hover:shadow-md transition-shadow"
     >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3 flex-1 min-w-0">
