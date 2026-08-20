@@ -25,7 +25,7 @@ import { Formik } from "formik";
 import { transactionSchema } from "./schema";
 import { CategoryService } from "@/service/client/category.service";
 import { Category } from "@/types/category";
-import { CURRENCIES } from "@/helpers/constants";
+import { CURRENCIES, DEFAULT_CURRENCY } from "@/helpers/constants";
 import { RequestTransaction } from "@/types/request/request-transaction";
 import useUserStore from "@/store/user-store";
 import { getCurrencySymbol } from "@/helpers/utils";
@@ -44,21 +44,20 @@ type TransactionFormValues = Omit<RequestTransaction, "transaction_date"> & {
   transaction_date: string;
 };
 
+const getSymbolByCurrencyId = (id: number) =>
+  getCurrencySymbol(CURRENCIES.find((currency) => currency.id === id)?.code);
+
 const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
   const { user } = useUserStore();
 
   const formInitState: TransactionFormValues = {
     category_id: null,
-    currency_id: user?.preferredCurrency?.id ?? CURRENCIES[0].id,
+    currency_id: user?.preferredCurrency?.id ?? DEFAULT_CURRENCY.id,
     amount: 0,
     type: TransactionType.EXPENSE,
     description: "",
     transaction_date: new Date().toISOString().split("T")[0],
   };
-
-  const currencySymbol = useUserStore((state) =>
-    getCurrencySymbol(state.user?.preferredCurrency?.code),
-  );
 
   const [open, setOpen] = useState(false);
   const [groupedCategories, setGroupedCategories] = useState<GroupedCategories>(
@@ -75,8 +74,6 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
         : "General transaction",
       transaction_date: new Date(values.transaction_date),
     };
-
-    console.log("lalal", newTransaction);
 
     try {
       await TransactionService.addTransaction(newTransaction);
@@ -158,22 +155,56 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
             errors,
           }) => (
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label htmlFor="amount">Amount</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1.5 text-muted-foreground">
-                    {currencySymbol}
-                  </span>
-                  <Input
-                    id="amount"
-                    type="number"
-                    placeholder="0.00"
-                    className="pl-7"
-                    value={values.amount}
-                    onChange={handleChange}
-                  />
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="space-y-2 flex-1">
+                  <Label htmlFor="amount">Amount</Label>
+                  <div className="relative">
+                    {/* <span className="absolute left-3 top-1.5 text-muted-foreground">
+                      {getSymbolByCurrencyId(values.currency_id)}
+                    </span> */}
+                    <Input
+                      id="amount"
+                      type="number"
+                      placeholder="0.00"
+                      value={values.amount}
+                      onChange={handleChange}
+                    />
+                  </div>
                   {touched.amount && errors.amount && (
                     <p className="text-sm text-red-500 mt-1">{errors.amount}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2 sm:w-32">
+                  <Label>Currency</Label>
+                  <Select
+                    name="currency_id"
+                    value={String(values.currency_id)}
+                    onValueChange={(val) =>
+                      setFieldValue("currency_id", Number(val))
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a currency" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCIES.map((currency) => (
+                        <SelectItem
+                          key={currency.id}
+                          value={String(currency.id)}
+                        >
+                          <span className="font-semibold">
+                            {getCurrencySymbol(currency.code)}
+                          </span>
+                          {currency.code}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {touched.currency_id && errors.currency_id && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {errors.currency_id}
+                    </p>
                   )}
                 </div>
               </div>
@@ -259,11 +290,6 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
                   onChange={handleChange}
                 />
               </div>
-              {touched.currency_id && errors.currency_id && (
-                <p className="text-sm text-red-500 mt-1">
-                  {errors.currency_id}
-                </p>
-              )}
 
               <div className="flex gap-3 pt-2">
                 <DialogClose className="flex-1 cursor-pointer">

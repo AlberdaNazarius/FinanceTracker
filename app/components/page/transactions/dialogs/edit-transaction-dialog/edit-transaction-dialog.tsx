@@ -12,7 +12,7 @@ import {Formik} from 'formik';
 import {transactionSchema} from "./schema";
 import {CategoryService} from "@/service/client/category.service";
 import {Category} from "@/types/category";
-import {CURRENCIES} from "@/helpers/constants";
+import {CURRENCIES, DEFAULT_CURRENCY} from "@/helpers/constants";
 import {RequestTransaction} from "@/types/request/request-transaction";
 import useUserStore from "@/store/user-store";
 import {getCurrencySymbol, normalizeDateToInput} from "@/helpers/utils";
@@ -34,18 +34,16 @@ type TransactionFormValues = Omit<RequestTransaction, 'transaction_date'> & {
 };
 
 const EditTransactionDialog: React.FC<Props> = ({transaction, onSuccess}) => {
+  const {user} = useUserStore();
+
   const formInitState: TransactionFormValues = {
     category_id: transaction?.category?.id ?? null,
-    currency_id: transaction?.currency?.id ?? CURRENCIES[0].id,
+    currency_id: transaction?.currency?.id ?? user?.preferredCurrency?.id ?? DEFAULT_CURRENCY.id,
     amount: transaction?.amount ?? 0,
     type: transaction?.type ?? TransactionType.EXPENSE,
     description: transaction?.description ?? '',
     transaction_date: normalizeDateToInput(transaction?.transaction_date),
   }
-
-  const currencySymbol = useUserStore(state =>
-    getCurrencySymbol(state.user?.preferredCurrency?.code)
-  );
 
   const [open, setOpen] = useState(false);
   const [groupedCategories, setGroupedCategories] = useState<GroupedCategories>({});
@@ -128,19 +126,40 @@ const EditTransactionDialog: React.FC<Props> = ({transaction, onSuccess}) => {
         >
           {({values, handleChange, handleSubmit, setFieldValue, touched, errors}) => (
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-              <div className="space-y-2">
-                <Label htmlFor="amount">Amount</Label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1.5 text-muted-foreground">{currencySymbol}</span>
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="space-y-2 flex-1">
+                  <Label htmlFor="amount">Amount</Label>
                   <Input
                     id="amount"
                     type="number"
                     placeholder="0.00"
-                    className="pl-7"
                     value={values.amount}
                     onChange={handleChange}
                   />
                   {touched.amount && errors.amount && <p className="text-sm text-red-500 mt-1">{errors.amount}</p>}
+                </div>
+
+                <div className="space-y-2 sm:w-32">
+                  <Label>Currency</Label>
+                  <Select
+                    name='currency_id'
+                    value={String(values.currency_id)}
+                    onValueChange={(val) => setFieldValue("currency_id", Number(val))}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a currency"/>
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CURRENCIES.map((currency) => (
+                        <SelectItem key={currency.id} value={String(currency.id)}>
+                          <span className="font-semibold">{getCurrencySymbol(currency.code)}</span>
+                          {currency.code}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {touched.currency_id && errors.currency_id &&
+                      <p className="text-sm text-red-500 mt-1">{errors.currency_id}</p>}
                 </div>
               </div>
 
@@ -211,8 +230,6 @@ const EditTransactionDialog: React.FC<Props> = ({transaction, onSuccess}) => {
                   onChange={handleChange}
                 />
               </div>
-              {touched.currency_id && errors.currency_id &&
-                  <p className="text-sm text-red-500 mt-1">{errors.currency_id}</p>}
 
               <div className="flex gap-3 pt-2">
                 <DialogClose className="flex-1 cursor-pointer">
