@@ -1,7 +1,8 @@
 "use client"
 
-import {CircleDollarSign, User} from "lucide-react"
+import {CircleDollarSign, LogOut, Settings, User} from "lucide-react"
 import Link from "next/link"
+import {useState} from "react";
 import useUserStore from "@/store/user-store";
 import {AuthService} from "@/service/client/auth.service";
 import {Routes} from "@/enum/routes";
@@ -13,16 +14,24 @@ import {
 import {Button} from "@/components/ui/button";
 import {useRouter, usePathname} from "next/navigation";
 import {cn} from "@/helpers/utils";
-import ThemeToggle from "@/components/common/theme-toggle/theme-toggle";
+import SettingsDialog from "@/components/common/settings-dialog/settings-dialog";
 
 export default function Header() {
   const {user} = useUserStore();
   const router = useRouter();
   const pathname = usePathname()
 
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
   const handleLogout = async () => {
     await AuthService.logout();
     router.replace(Routes.LOGIN);
+  }
+
+  const openSettings = () => {
+    setMenuOpen(false);
+    requestAnimationFrame(() => setSettingsOpen(true));
   }
 
   return (
@@ -73,9 +82,8 @@ export default function Header() {
 
           {/* User Menu */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <ThemeToggle />
             {user ? (
-              <DropdownMenu>
+              <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
                 <DropdownMenuTrigger asChild>
                   <button
                     className="flex gap-1 items-center font-semibold justify-center cursor-pointer text-foreground hover:text-primary transition-colors">
@@ -83,9 +91,17 @@ export default function Header() {
                     <span className="text-sm">{user?.username}</span>
                   </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-24 flex flex-col items-center justify-center">
-                  <Button size='sm' className='text-sm text-foreground cursor-pointer w-full' variant='ghost'
+                <DropdownMenuContent className="w-40 flex flex-col">
+                  <Button size='sm'
+                          className='text-sm text-foreground cursor-pointer w-full justify-start' variant='ghost'
+                          onClick={openSettings}>
+                    <Settings className='h-4 w-4'/>
+                    Settings
+                  </Button>
+                  <Button size='sm'
+                          className='text-sm text-foreground cursor-pointer w-full justify-start' variant='ghost'
                           onClick={handleLogout}>
+                    <LogOut className='h-4 w-4'/>
                     Logout
                   </Button>
                 </DropdownMenuContent>
@@ -103,6 +119,10 @@ export default function Header() {
           </div>
         </div>
       </div>
+
+      {user && (
+        <SettingsDialog open={settingsOpen} onOpenChange={setSettingsOpen} />
+      )}
     </header>
   )
 }
