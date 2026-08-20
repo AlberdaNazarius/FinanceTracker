@@ -18,8 +18,14 @@ const getUserBalance = async () => {
   return response.data?.data?.balance;
 }
 
+const updateUser = async (payload: { preferred_currency_id: number }) => {
+  const response = await axios.patch(ApiRoutes.USER, payload);
+  return response.data;
+}
+
 export const UserService = {
   getUser,
   refreshUser,
-  getUserBalance
+  getUserBalance,
+  updateUser
 }

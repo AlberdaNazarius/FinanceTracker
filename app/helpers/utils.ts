@@ -2,6 +2,7 @@ import {clsx, type ClassValue} from "clsx"
 import {twMerge} from "tailwind-merge"
 import {DEFAULT_CURRENCY} from "@/helpers/constants";
 import {BudgetSummary} from "@/types/budget-summary";
+import { DateRange } from "@/enum/date-range";
 
 export const formatDate = (dateString: Date | null): string => {
   if (!dateString) return 'Unknown';
@@ -29,6 +30,7 @@ export const formatMoney = (amount: number | null | undefined, code: string | nu
   return new Intl.NumberFormat("en", {
     style: "currency",
     currency: code ?? DEFAULT_CURRENCY.code,
+    currencyDisplay: "narrowSymbol",
     maximumFractionDigits: 2,
     minimumFractionDigits: 2
   }).format(amount);
@@ -37,9 +39,10 @@ export const formatMoney = (amount: number | null | undefined, code: string | nu
 export const getCurrencySymbol = (currencyCode: string | undefined) => {
   const code = currencyCode ?? DEFAULT_CURRENCY.code;
 
-    const parts = new Intl.NumberFormat("en", {
+  const parts = new Intl.NumberFormat("en", {
     style: "currency",
     currency: code,
+    currencyDisplay: "narrowSymbol",
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).formatToParts(0);
@@ -77,3 +80,40 @@ export function calculateBudgetTotals(budgets: BudgetSummary[]) {
     isOverBudget
   };
 }
+
+export const getDateRange = (range: DateRange): Date | null => {
+  const now = new Date();
+  const today = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    23,
+    59,
+    59,
+    999
+  );
+
+  switch (range) {
+    case DateRange.WEEK: {
+      const start = new Date(today);
+      start.setDate(start.getDate() - 6);
+      start.setHours(0, 0, 0, 0);
+      return start;
+    }
+    case DateRange.MONTH: {
+      return new Date(
+        today.getFullYear(),
+        today.getMonth(),
+        1,
+        0,
+        0,
+        0,
+        0
+      );
+    }
+    case DateRange.ALL:
+      return null;
+    default:
+      return null;
+  }
+};
