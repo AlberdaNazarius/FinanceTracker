@@ -96,7 +96,6 @@ const SettingsDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   )
   const [saving, setSaving] = useState(false)
 
-  // Re-sync the pending currency selection whenever the dialog (re)opens.
   useEffect(() => {
     if (open) {
       setCurrencyId(user?.preferredCurrency?.id ?? null)
@@ -107,7 +106,7 @@ const SettingsDialog: React.FC<Props> = ({ open, onOpenChange }) => {
     <div className="flex flex-col gap-2">
       <span className="text-sm font-semibold text-foreground">Username</span>
       <div className="rounded-md border border-border bg-card px-3.5 py-2.5 text-sm text-foreground">
-        {user?.username ?? "—"}
+        {user?.username ?? "-"}
       </div>
     </div>
   )
@@ -131,7 +130,7 @@ const SettingsDialog: React.FC<Props> = ({ open, onOpenChange }) => {
                 <span className="font-semibold">
                   {getCurrencySymbol(currency.code)}
                 </span>
-                {currency.code} — {currency.unit_text}
+                {currency.code} - {currency.unit_text}
               </SelectItem>
             ))}
           </SelectContent>
@@ -161,7 +160,6 @@ const SettingsDialog: React.FC<Props> = ({ open, onOpenChange }) => {
         content: preferencesContent,
       },
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [user, currencyId, mode]
   )
 

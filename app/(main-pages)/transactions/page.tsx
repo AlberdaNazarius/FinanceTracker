@@ -9,7 +9,7 @@ import {TransactionType} from "@/enum/transaction-type";
 import {Category} from "@/types/category";
 import {CategoryService} from "@/service/client/category.service";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
-import {cn} from "@/helpers/utils";
+import {cn, getDateRange} from "@/helpers/utils";
 import {DateRange} from "@/enum/date-range";
 import PageHeader from "@/components/common/page-header/page-header";
 import AddTransactionDialog from "@/components/page/home/dialogs/add-transaction-dialog/add-transaction-dialog";
@@ -41,44 +41,6 @@ const Transactions = () => {
 
     fetchCategories();
   }, []);
-
-  // TODO move to utils
-  const getDateRange = (range: DateRange): Date | null => {
-    const now = new Date();
-    const today = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-      23,
-      59,
-      59,
-      999
-    );
-
-    switch (range) {
-      case DateRange.WEEK: {
-        const start = new Date(today);
-        start.setDate(start.getDate() - 6);
-        start.setHours(0, 0, 0, 0);
-        return start;
-      }
-      case DateRange.MONTH: {
-        return new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          1,
-          0,
-          0,
-          0,
-          0
-        );
-      }
-      case DateRange.ALL:
-        return null;
-      default:
-        return null;
-    }
-  };
 
   const filteredTransactions = useMemo(() => {
     let filtered = [...transactions];
