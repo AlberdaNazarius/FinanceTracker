@@ -5,4 +5,5 @@ export enum Routes {
   TRANSACTIONS = '/transactions',
   CATEGORIES = '/categories',
   BUDGET = '/budget',
+  ACCOUNTS = '/accounts',
 }
