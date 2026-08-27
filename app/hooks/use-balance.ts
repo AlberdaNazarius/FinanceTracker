@@ -1,8 +1,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { UserService } from "@/service/client/user.service";
+import { ResponseBalance } from "@/types/response/response-balance";
+import { DEFAULT_CURRENCY } from "@/helpers/constants";
+
+const EMPTY: ResponseBalance = {
+  total: 0,
+  currency: DEFAULT_CURRENCY.code,
+  locations: [],
+  ratesAvailable: true,
+};
 
 export function useBalance() {
-  const [balance, setBalance] = useState<number>(0);
+  const [balance, setBalance] = useState<ResponseBalance>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -10,7 +19,7 @@ export function useBalance() {
     try {
       setLoading(true);
       const result = await UserService.getUserBalance();
-      setBalance(result);
+      setBalance(result ?? EMPTY);
     } catch (err) {
       setError(err as Error);
     } finally {
