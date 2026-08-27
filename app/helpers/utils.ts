@@ -50,16 +50,41 @@ export const getCurrencySymbol = (currencyCode: string | undefined) => {
   return symbolPart ? symbolPart.value : code;
 }
 
+const toDateInput = (date: Date): string => {
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${date.getFullYear()}-${month}-${day}`;
+};
+
 export const normalizeDateToInput = (value?: string | Date | null): string => {
   if (!value) {
-    return new Date().toISOString().split("T")[0];
+    return toDateInput(new Date());
   }
 
   if (value instanceof Date) {
-    return value.toISOString().split("T")[0];
+    return toDateInput(value);
   }
 
-  return value.split("T")[0];
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return value;
+  }
+
+  return toDateInput(new Date(value));
+};
+
+export const dateInputToTimestamp = (value: string): Date => {
+  const [year, month, day] = value.split("-").map(Number);
+  const now = new Date();
+
+  return new Date(
+    year,
+    month - 1,
+    day,
+    now.getHours(),
+    now.getMinutes(),
+    now.getSeconds(),
+    now.getMilliseconds()
+  );
 };
 
 export function calculateBudgetTotals(budgets: BudgetSummary[]) {

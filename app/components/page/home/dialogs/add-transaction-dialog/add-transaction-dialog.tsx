@@ -34,6 +34,7 @@ import {
   TransactionFormValues,
   TransferFormValues,
 } from "@/components/common/operation-form/types";
+import { dateInputToTimestamp } from "@/helpers/utils";
 import { toast } from "@/store/toast-store";
 
 type Props = {
@@ -98,7 +99,7 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
       location_id: values.location_id,
       category_id: values.category_id,
       description: values.description || "General transaction",
-      transaction_date: new Date(values.transaction_date),
+      transaction_date: dateInputToTimestamp(values.transaction_date),
     };
 
     try {
@@ -120,7 +121,7 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
       to_amount: Number(values.to_amount),
       fee_amount: Number(values.fee_amount) || 0,
       description: values.description || undefined,
-      transfer_date: new Date(values.transfer_date),
+      transfer_date: dateInputToTimestamp(values.transfer_date),
     };
 
     try {

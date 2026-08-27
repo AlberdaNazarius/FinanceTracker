@@ -15,7 +15,7 @@ import {useGroupedCategories} from "@/hooks/use-grouped-categories"
 import TransactionFields from "@/components/common/operation-form/transaction-fields"
 import {transactionSchema} from "@/components/common/operation-form/schema"
 import {TransactionFormValues} from "@/components/common/operation-form/types"
-import {normalizeDateToInput} from "@/helpers/utils"
+import {dateInputToTimestamp, normalizeDateToInput} from "@/helpers/utils"
 import {toast} from "@/store/toast-store"
 
 type Props = {
@@ -66,7 +66,10 @@ const EditTransactionDialog: React.FC<Props> = ({transaction, onSuccess}) => {
       location_id: values.location_id,
       category_id: values.category_id,
       description: values.description || "General transaction",
-      transaction_date: new Date(values.transaction_date),
+      transaction_date:
+        values.transaction_date === normalizeDateToInput(transaction?.transaction_date)
+          ? transaction.transaction_date
+          : dateInputToTimestamp(values.transaction_date),
     };
 
     try {

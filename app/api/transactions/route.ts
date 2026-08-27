@@ -15,7 +15,8 @@ export async function GET() {
     const {data, error} = await supabase
       .from("transaction")
       .select(TRANSACTION_SELECT)
-      .order("transaction_date", {ascending: false});
+      .order("transaction_date", {ascending: false})
+      .order("created_at", {ascending: false});
 
     if (error) {
       return jsonError(error.message, 400);

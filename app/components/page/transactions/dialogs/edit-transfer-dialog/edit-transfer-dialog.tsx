@@ -12,7 +12,7 @@ import {RequestTransfer, ResponseTransfer} from "@/types/transfer"
 import TransferFields from "@/components/common/operation-form/transfer-fields"
 import {transferSchema} from "@/components/common/operation-form/schema"
 import {TransferFormValues} from "@/components/common/operation-form/types"
-import {normalizeDateToInput} from "@/helpers/utils"
+import {dateInputToTimestamp, normalizeDateToInput} from "@/helpers/utils"
 import {toast} from "@/store/toast-store"
 
 type Props = {
@@ -60,7 +60,10 @@ const EditTransferDialog: React.FC<Props> = ({transfer, onSuccess}) => {
       to_amount: Number(values.to_amount),
       fee_amount: Number(values.fee_amount) || 0,
       description: values.description || undefined,
-      transfer_date: new Date(values.transfer_date),
+      transfer_date:
+        values.transfer_date === normalizeDateToInput(transfer?.transfer_date)
+          ? transfer.transfer_date
+          : dateInputToTimestamp(values.transfer_date),
     };
 
     try {
