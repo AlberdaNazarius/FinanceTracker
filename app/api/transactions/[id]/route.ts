@@ -1,5 +1,7 @@
 import {NextRequest, NextResponse} from "next/server";
 import {getSupabaseUser, jsonError} from "@/helpers/server-utils";
+import {TRANSACTION_SELECT} from "@/helpers/query-selects";
+import {resolveLocationCurrency} from "@/helpers/server/location-currency";
 
 export async function PUT(
   req: NextRequest,
@@ -24,12 +26,26 @@ export async function PUT(
       return jsonError("Unauthorized", 401);
     }
 
+    if (body.location_id) {
+      const currencyId = await resolveLocationCurrency(
+        supabase,
+        user.id,
+        body.location_id
+      );
+
+      if (!currencyId) {
+        return jsonError("Location not found or access denied", 400);
+      }
+
+      body.currency_id = currencyId;
+    }
+
     const { data, error } = await supabase
       .from("transaction")
       .update(body)
       .eq('id', id)
       .eq('user_id', user.id)
-      .select()
+      .select(TRANSACTION_SELECT)
       .single();
 
     if (error) {

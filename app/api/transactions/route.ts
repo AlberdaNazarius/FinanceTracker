@@ -5,6 +5,8 @@ import {
   jsonError,
   handleApiError,
 } from "@/helpers/server-utils";
+import { TRANSACTION_SELECT } from "@/helpers/query-selects";
+import { resolveLocationCurrency } from "@/helpers/server/location-currency";
 
 export async function GET() {
   try {
@@ -12,11 +14,7 @@ export async function GET() {
 
     const {data, error} = await supabase
       .from("transaction")
-      .select(`
-        *,
-        category:category_id (*),
-        currency:currency_id (*)
-      `)
+      .select(TRANSACTION_SELECT)
       .order("transaction_date", {ascending: false});
 
     if (error) {
@@ -43,13 +41,28 @@ export async function POST(req: Request) {
       return jsonError("Unauthorized", 401);
     }
 
+    if (!body.location_id) {
+      return jsonError("location_id is required", 400);
+    }
+
+    const currencyId = await resolveLocationCurrency(
+      supabase,
+      user.id,
+      body.location_id
+    );
+
+    if (!currencyId) {
+      return jsonError("Location not found or access denied", 400);
+    }
+
     const {data, error} = await supabase
       .from("transaction")
       .insert({
         ...body,
+        currency_id: currencyId,
         user_id: user.id
       })
-      .select()
+      .select(TRANSACTION_SELECT)
       .single();
 
     if (error) {

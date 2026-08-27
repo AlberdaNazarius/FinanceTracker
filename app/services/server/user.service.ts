@@ -1,6 +1,7 @@
 import {cookies} from "next/headers";
 import {createClient} from "@/helpers/supabase/server";
 import {User} from "@/types/user";
+import {toUser} from "@/helpers/user-mapper";
 import {isDynamicServerError} from "next/dist/client/components/hooks-server-context";
 
 const getUserRequest = async (): Promise<User | null> => {
@@ -20,19 +21,13 @@ const getUserRequest = async (): Promise<User | null> => {
       .from("user")
       .select(`
         username,
+        dashboard_settings,
         preferredCurrency:preferred_currency_id (*)
       `)
       .eq("id", authUser.id)
       .single();
 
-    const userProfile: User = {
-      username: profile?.username,
-      preferredCurrency: Array.isArray(profile?.preferredCurrency)
-        ? profile!.preferredCurrency[0]
-        : profile!.preferredCurrency!
-    }
-
-    return userProfile ?? null;
+    return toUser(profile);
   } catch (error) {
     if (isDynamicServerError(error)) {
       throw error;
