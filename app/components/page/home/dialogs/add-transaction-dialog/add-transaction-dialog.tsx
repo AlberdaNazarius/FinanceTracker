@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Plus } from "lucide-react";
 import {
   Dialog,
   DialogTrigger,
@@ -9,122 +10,129 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Formik, FormikProps } from "formik";
 import { TransactionType } from "@/enum/transaction-type";
+import { OperationKind } from "@/enum/operation-kind";
 import { TransactionService } from "@/service/client/transaction.service";
-import { Formik } from "formik";
-import { transactionSchema } from "./schema";
-import { CategoryService } from "@/service/client/category.service";
-import { Category } from "@/types/category";
-import { CURRENCIES, DEFAULT_CURRENCY } from "@/helpers/constants";
+import { TransferService } from "@/service/client/transfer.service";
+import { MoneyLocationService } from "@/service/client/money-location.service";
+import { MoneyLocation } from "@/types/money-location";
 import { RequestTransaction } from "@/types/request/request-transaction";
-import useUserStore from "@/store/user-store";
-import { getCurrencySymbol } from "@/helpers/utils";
+import { RequestTransfer } from "@/types/transfer";
+import { useGroupedCategories } from "@/hooks/use-grouped-categories";
+import OperationTypeSwitch, {
+  OperationFormType,
+} from "@/components/common/operation-form/operation-type-switch";
+import TransactionFields from "@/components/common/operation-form/transaction-fields";
+import TransferFields from "@/components/common/operation-form/transfer-fields";
+import {
+  transactionSchema,
+  transferSchema,
+} from "@/components/common/operation-form/schema";
+import {
+  TransactionFormValues,
+  TransferFormValues,
+} from "@/components/common/operation-form/types";
 import { toast } from "@/store/toast-store";
-import { Plus } from "lucide-react";
 
 type Props = {
   onSuccess?: () => void;
 };
 
-type GroupedCategories = {
-  [key in TransactionType]?: Category[];
-};
-
-type TransactionFormValues = Omit<RequestTransaction, "transaction_date"> & {
-  transaction_date: string;
-};
-
-const getSymbolByCurrencyId = (id: number) =>
-  getCurrencySymbol(CURRENCIES.find((currency) => currency.id === id)?.code);
+const today = () => new Date().toISOString().split("T")[0];
 
 const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
-  const { user } = useUserStore();
-
-  const formInitState: TransactionFormValues = {
-    category_id: null,
-    currency_id: user?.preferredCurrency?.id ?? DEFAULT_CURRENCY.id,
-    amount: 0,
-    type: TransactionType.EXPENSE,
-    description: "",
-    transaction_date: new Date().toISOString().split("T")[0],
-  };
-
   const [open, setOpen] = useState(false);
-  const [groupedCategories, setGroupedCategories] = useState<GroupedCategories>(
-    {},
+  const [operationType, setOperationType] = useState<OperationFormType>(
+    TransactionType.EXPENSE,
   );
+  const [locations, setLocations] = useState<MoneyLocation[]>([]);
 
-  const handleSubmit = async (values: TransactionFormValues) => {
-    if (!values) return;
-
-    const newTransaction: RequestTransaction = {
-      ...values,
-      description: values.description
-        ? values.description
-        : "General transaction",
-      transaction_date: new Date(values.transaction_date),
-    };
-
-    try {
-      await TransactionService.addTransaction(newTransaction);
-      toast.success("Transaction added");
-      onSuccess?.();
-    } catch (error) {
-      console.error("Failed to add transaction:", error);
-      toast.error("Failed to add transaction");
-    }
-
-    setOpen(false);
-  };
+  const groupedCategories = useGroupedCategories(open);
 
   useEffect(() => {
     if (!open) return;
 
-    const fetchData = async (): Promise<Category[] | undefined> => {
-      try {
-        const response = await CategoryService.getCategories();
-        //console.log("Fetched data:", response);
-        return response.data;
-      } catch (error) {
-        console.error("Error fetching data:", error);
-      }
+    let mounted = true;
+
+    MoneyLocationService.getLocations()
+      .then(({ data }) => {
+        if (mounted) setLocations((data ?? []).filter((l) => !l.archived));
+      })
+      .catch((error) => console.error("Error fetching locations:", error));
+
+    return () => {
+      mounted = false;
     };
-
-    const groupCategories = async () => {
-      const categories = await fetchData();
-      if (!categories) {
-        return;
-      }
-
-      const categoriesByType = categories.reduce<GroupedCategories>(
-        (acc, category) => {
-          const { type } = category;
-
-          if (!acc[type]) {
-            acc[type] = [];
-          }
-
-          acc[type].push(category);
-
-          return acc;
-        },
-        {},
-      );
-      setGroupedCategories(categoriesByType);
-    };
-
-    groupCategories();
   }, [open]);
+
+  const defaultLocationId = useMemo(
+    () => locations.find((location) => location.is_default)?.id ?? locations[0]?.id ?? null,
+    [locations],
+  );
+
+  const transactionInitState: TransactionFormValues = {
+    type: operationType === OperationKind.TRANSFER ? TransactionType.EXPENSE : operationType,
+    amount: "",
+    location_id: defaultLocationId,
+    category_id: null,
+    description: "",
+    transaction_date: today(),
+  };
+
+  const transferInitState: TransferFormValues = {
+    from_location_id: defaultLocationId,
+    to_location_id: null,
+    from_amount: "",
+    to_amount: "",
+    fee_amount: "",
+    description: "",
+    transfer_date: today(),
+  };
+
+  const handleTransactionSubmit = async (values: TransactionFormValues) => {
+    const payload: RequestTransaction = {
+      type: values.type,
+      amount: Number(values.amount),
+      location_id: values.location_id,
+      category_id: values.category_id,
+      description: values.description || "General transaction",
+      transaction_date: new Date(values.transaction_date),
+    };
+
+    try {
+      await TransactionService.addTransaction(payload);
+      toast.success("Transaction added");
+      onSuccess?.();
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to add transaction:", error);
+      toast.error("Failed to add transaction");
+    }
+  };
+
+  const handleTransferSubmit = async (values: TransferFormValues) => {
+    const payload: RequestTransfer = {
+      from_location_id: values.from_location_id!,
+      to_location_id: values.to_location_id!,
+      from_amount: Number(values.from_amount),
+      to_amount: Number(values.to_amount),
+      fee_amount: Number(values.fee_amount) || 0,
+      description: values.description || undefined,
+      transfer_date: new Date(values.transfer_date),
+    };
+
+    try {
+      await TransferService.addTransfer(payload);
+      toast.success("Transfer added");
+      onSuccess?.();
+      setOpen(false);
+    } catch (error) {
+      console.error("Failed to add transfer:", error);
+      toast.error("Failed to add transfer");
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -138,170 +146,65 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
-            Add Transaction
+            {operationType === OperationKind.TRANSFER ? "New Transfer" : "Add Transaction"}
           </DialogTitle>
         </DialogHeader>
-        <Formik
-          initialValues={formInitState}
-          validationSchema={transactionSchema}
-          onSubmit={handleSubmit}
-        >
-          {({
-            values,
-            handleChange,
-            handleSubmit,
-            setFieldValue,
-            touched,
-            errors,
-          }) => (
-            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="space-y-2 flex-1">
-                  <Label htmlFor="amount">Amount</Label>
-                  <div className="relative">
-                    {/* <span className="absolute left-3 top-1.5 text-muted-foreground">
-                      {getSymbolByCurrencyId(values.currency_id)}
-                    </span> */}
-                    <Input
-                      id="amount"
-                      type="number"
-                      placeholder="0.00"
-                      value={values.amount}
-                      onChange={handleChange}
-                    />
-                  </div>
-                  {touched.amount && errors.amount && (
-                    <p className="text-sm text-red-500 mt-1">{errors.amount}</p>
-                  )}
-                </div>
 
-                <div className="space-y-2 sm:w-32">
-                  <Label>Currency</Label>
-                  <Select
-                    name="currency_id"
-                    value={String(values.currency_id)}
-                    onValueChange={(val) =>
-                      setFieldValue("currency_id", Number(val))
-                    }
+        <div className="mt-2">
+          <OperationTypeSwitch value={operationType} onChange={setOperationType} />
+        </div>
+
+        {operationType === OperationKind.TRANSFER ? (
+          <Formik
+            initialValues={transferInitState}
+            validationSchema={transferSchema}
+            onSubmit={handleTransferSubmit}
+            enableReinitialize
+          >
+            {(form: FormikProps<TransferFormValues>) => (
+              <form onSubmit={form.handleSubmit} className="space-y-4 mt-4">
+                <TransferFields form={form} locations={locations} />
+                <div className="flex gap-3 pt-2">
+                  <DialogClose className="flex-1 cursor-pointer">Cancel</DialogClose>
+                  <Button
+                    type="submit"
+                    className="flex-2 cursor-pointer"
+                    disabled={form.isSubmitting}
                   >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a currency" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {CURRENCIES.map((currency) => (
-                        <SelectItem
-                          key={currency.id}
-                          value={String(currency.id)}
-                        >
-                          <span className="font-semibold">
-                            {getCurrencySymbol(currency.code)}
-                          </span>
-                          {currency.code}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {touched.currency_id && errors.currency_id && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {errors.currency_id}
-                    </p>
-                  )}
+                    Transfer
+                  </Button>
                 </div>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="space-y-2 flex-1">
-                  <Label>Type</Label>
-                  <Select
-                    name="type"
-                    value={values.type}
-                    onValueChange={(val) => setFieldValue("type", val)}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value={TransactionType.EXPENSE}>
-                        Expenses
-                      </SelectItem>
-                      <SelectItem value={TransactionType.INCOME}>
-                        Income
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  {touched.type && errors.type && (
-                    <p className="text-sm text-red-500 mt-1">{errors.type}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2 flex-1">
-                  <Label>Category</Label>
-                  <Select
-                    name="category_id"
-                    value={values?.category_id ?? ""}
-                    onValueChange={(val) => setFieldValue("category_id", val)}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select a category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {groupedCategories[values.type]?.map((category) => (
-                        <SelectItem key={category.id} value={category.id}>
-                          {category.name}
-                        </SelectItem>
-                      ))}
-                      {(!groupedCategories[values.type] ||
-                        groupedCategories[values.type]?.length === 0) && (
-                        <div className="p-2 text-xs text-center text-muted-foreground">
-                          No {values.type} categories found
-                        </div>
-                      )}
-                    </SelectContent>
-                  </Select>
-                  {touched.category_id && errors.category_id && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {errors.category_id}
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Description</Label>
-                <Input
-                  id="description"
-                  placeholder="Add a note (optional)"
-                  value={values.description}
-                  onChange={handleChange}
+              </form>
+            )}
+          </Formik>
+        ) : (
+          <Formik
+            initialValues={transactionInitState}
+            validationSchema={transactionSchema}
+            onSubmit={handleTransactionSubmit}
+            enableReinitialize
+          >
+            {(form: FormikProps<TransactionFormValues>) => (
+              <form onSubmit={form.handleSubmit} className="space-y-4 mt-4">
+                <TransactionFields
+                  form={form}
+                  locations={locations}
+                  groupedCategories={groupedCategories}
                 />
-                {touched.description && errors.description && (
-                  <p className="text-sm text-red-500 mt-1">
-                    {errors.description}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="transaction_date">Date</Label>
-                <Input
-                  id="transaction_date"
-                  type="date"
-                  value={values.transaction_date}
-                  onChange={handleChange}
-                />
-              </div>
-
-              <div className="flex gap-3 pt-2">
-                <DialogClose className="flex-1 cursor-pointer">
-                  Cancel
-                </DialogClose>
-                <Button type="submit" className="flex-2 cursor-pointer">
-                  Add
-                </Button>
-              </div>
-            </form>
-          )}
-        </Formik>
+                <div className="flex gap-3 pt-2">
+                  <DialogClose className="flex-1 cursor-pointer">Cancel</DialogClose>
+                  <Button
+                    type="submit"
+                    className="flex-2 cursor-pointer"
+                    disabled={form.isSubmitting}
+                  >
+                    Add
+                  </Button>
+                </div>
+              </form>
+            )}
+          </Formik>
+        )}
       </DialogContent>
     </Dialog>
   );
