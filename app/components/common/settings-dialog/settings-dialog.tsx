@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useEffect, useMemo, useState } from "react"
-import { User as UserIcon, SlidersHorizontal } from "lucide-react"
+import React, { useEffect, useState } from "react"
+import { Check, LayoutDashboard, User as UserIcon, SlidersHorizontal } from "lucide-react"
 import {
   Dialog,
   DialogContent,
@@ -17,23 +17,57 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { Switch } from "@/components/ui/switch"
 import { CURRENCIES } from "@/helpers/constants"
 import { cn, getCurrencySymbol } from "@/helpers/utils"
 import useUserStore from "@/store/user-store"
 import { UserService } from "@/service/client/user.service"
+import { MoneyLocationService } from "@/service/client/money-location.service"
 import { toast } from "@/store/toast-store"
 import { useTheme, ThemeMode } from "@/hooks/use-theme"
 import { useMediaQuery } from "@/hooks/use-media-query"
 import { Currency } from "@/types/currency"
+import { MoneyLocation } from "@/types/money-location"
+import {
+  DashboardSettings,
+  DEFAULT_DASHBOARD_SETTINGS,
+} from "@/types/dashboard-settings"
 
 type Props = {
   open: boolean
   onOpenChange: (open: boolean) => void
 }
 
-type SectionId = "profile" | "preferences"
+type SectionId = "profile" | "preferences" | "dashboard"
 
 const THEME_OPTIONS: ThemeMode[] = ["light", "dark", "system"]
+
+const WIDGET_TOGGLES: {
+  key: keyof Omit<DashboardSettings, "accountIds">
+  title: string
+  description: string
+}[] = [
+  {
+    key: "showBalance",
+    title: "Total balance",
+    description: "The hero card at the top of the dashboard.",
+  },
+  {
+    key: "showSpendingChart",
+    title: "Spending chart",
+    description: "Expenses of the current month, broken down by category.",
+  },
+  {
+    key: "showBudgetOverview",
+    title: "Budget overview",
+    description: "Progress against your active budgets.",
+  },
+  {
+    key: "showAccounts",
+    title: "Accounts",
+    description: "How much sits in each money location.",
+  },
+]
 
 function SettingRow({
   title,
@@ -94,13 +128,51 @@ const SettingsDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   const [currencyId, setCurrencyId] = useState<number | null>(
     user?.preferredCurrency?.id ?? null
   )
+  const [dashboard, setDashboard] = useState<DashboardSettings>(
+    user?.dashboardSettings ?? DEFAULT_DASHBOARD_SETTINGS
+  )
+  const [locations, setLocations] = useState<MoneyLocation[]>([])
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    if (open) {
-      setCurrencyId(user?.preferredCurrency?.id ?? null)
-    }
+    if (!open) return
+
+    setCurrencyId(user?.preferredCurrency?.id ?? null)
+    setDashboard(user?.dashboardSettings ?? DEFAULT_DASHBOARD_SETTINGS)
   }, [open, user])
+
+  useEffect(() => {
+    if (!open) return
+
+    let mounted = true
+
+    MoneyLocationService.getLocations()
+      .then(({ data }) => {
+        if (mounted) setLocations((data ?? []).filter((l) => !l.archived))
+      })
+      .catch((error) => console.error("Failed to load locations:", error))
+
+    return () => {
+      mounted = false
+    }
+  }, [open])
+
+  const toggleAccount = (id: string) => {
+    setDashboard((prev) => {
+      const current = prev.accountIds ?? locations.map((l) => l.id)
+      const next = current.includes(id)
+        ? current.filter((accountId) => accountId !== id)
+        : [...current, id]
+
+        return {
+        ...prev,
+        accountIds: next.length === locations.length ? null : next,
+      }
+    })
+  }
+
+  const isAccountVisible = (id: string) =>
+    dashboard.accountIds === null || dashboard.accountIds.includes(id)
 
   const profileContent = (
     <div className="flex flex-col gap-2">
@@ -126,7 +198,11 @@ const SettingsDialog: React.FC<Props> = ({ open, onOpenChange }) => {
           </SelectTrigger>
           <SelectContent>
             {CURRENCIES.map((currency) => (
-              <SelectItem key={currency.id} value={String(currency.id)}>
+              <SelectItem
+                key={currency.id}
+                value={String(currency.id)}
+                className="cursor-pointer"
+              >
                 <span className="font-semibold">
                   {getCurrencySymbol(currency.code)}
                 </span>
@@ -145,59 +221,139 @@ const SettingsDialog: React.FC<Props> = ({ open, onOpenChange }) => {
     </div>
   )
 
-  const sections = useMemo(
-    () => [
-      {
-        id: "profile" as const,
-        label: "Profile",
-        icon: UserIcon,
-        content: profileContent,
-      },
-      {
-        id: "preferences" as const,
-        label: "Preferences",
-        icon: SlidersHorizontal,
-        content: preferencesContent,
-      },
-    ],
-    [user, currencyId, mode]
+  const dashboardContent = (
+    <div className="flex flex-col gap-5">
+      {WIDGET_TOGGLES.map((widget) => (
+        <SettingRow
+          key={widget.key}
+          title={widget.title}
+          description={widget.description}
+        >
+          <Switch
+            checked={dashboard[widget.key]}
+            onCheckedChange={(checked) =>
+              setDashboard((prev) => ({ ...prev, [widget.key]: checked }))
+            }
+          />
+        </SettingRow>
+      ))}
+
+      {dashboard.showAccounts && (
+        <>
+          <div className="h-px bg-border" />
+
+          <div className="flex flex-col gap-2">
+            <div className="text-sm font-semibold text-foreground">
+              Locations on the dashboard
+            </div>
+            <div className="text-xs text-muted-foreground">
+              Pick which balances show in the Accounts card.
+            </div>
+
+            <div className="mt-2 flex flex-col gap-1">
+              {locations.map((location) => {
+                const visible = isAccountVisible(location.id)
+
+                return (
+                  <button
+                    key={location.id}
+                    type="button"
+                    onClick={() => toggleAccount(location.id)}
+                    className={cn(
+                      "flex cursor-pointer items-center justify-between rounded-md px-3 py-2 text-left text-sm transition-colors",
+                      visible
+                        ? "bg-primary/10 text-foreground"
+                        : "text-muted-foreground hover:bg-accent/50"
+                    )}
+                  >
+                    <span className="flex items-center gap-2">
+                      <span>{location.icon}</span>
+                      {location.name}
+                      <span className="text-xs text-muted-foreground">
+                        {location.currency?.code}
+                      </span>
+                    </span>
+                    {visible && <Check className="h-4 w-4 text-primary" />}
+                  </button>
+                )
+              })}
+              {locations.length === 0 && (
+                <p className="py-2 text-xs text-muted-foreground">
+                  No money locations yet.
+                </p>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+    </div>
   )
+
+  const sections = [
+    {
+      id: "profile" as const,
+      label: "Profile",
+      icon: UserIcon,
+      content: profileContent,
+    },
+    {
+      id: "preferences" as const,
+      label: "Preferences",
+      icon: SlidersHorizontal,
+      content: preferencesContent,
+    },
+    {
+      id: "dashboard" as const,
+      label: "Dashboard",
+      icon: LayoutDashboard,
+      content: dashboardContent,
+    },
+  ]
 
   const active = sections.find((section) => section.id === activeSection) ?? sections[0]
 
   const handleCancel = () => {
     setCurrencyId(user?.preferredCurrency?.id ?? null)
+    setDashboard(user?.dashboardSettings ?? DEFAULT_DASHBOARD_SETTINGS)
     onOpenChange(false)
   }
 
   const handleSave = async () => {
-    const changed = currencyId != null && currencyId !== user?.preferredCurrency?.id
+    const currencyChanged =
+      currencyId != null && currencyId !== user?.preferredCurrency?.id
+    const dashboardChanged =
+      JSON.stringify(dashboard) !== JSON.stringify(user?.dashboardSettings)
 
-    if (changed) {
-      try {
-        setSaving(true)
-        const response = await UserService.updateUser({
-          preferred_currency_id: currencyId!,
-        })
-        const data = response?.data
-        const preferredCurrency: Currency = Array.isArray(data?.preferredCurrency)
-          ? data.preferredCurrency[0]
-          : data?.preferredCurrency
-
-        setUser({
-          username: data?.username ?? user!.username,
-          preferredCurrency,
-        })
-        toast.success("Settings saved")
-      } catch (error) {
-        console.error("Failed to save settings:", error)
-        toast.error("Failed to save settings")
-        setSaving(false)
-        return
-      }
-      setSaving(false)
+    if (!currencyChanged && !dashboardChanged) {
+      onOpenChange(false)
+      return
     }
 
+    try {
+      setSaving(true)
+      const response = await UserService.updateUser({
+        ...(currencyChanged ? { preferred_currency_id: currencyId! } : {}),
+        ...(dashboardChanged ? { dashboard_settings: dashboard } : {}),
+      })
+      const data = response?.data
+      const preferredCurrency: Currency = Array.isArray(data?.preferredCurrency)
+        ? data.preferredCurrency[0]
+        : data?.preferredCurrency
+
+      setUser({
+        username: data?.username ?? user!.username,
+        preferredCurrency,
+        dashboardSettings: data?.dashboard_settings ?? dashboard,
+      })
+      toast.success("Settings saved")
+    } catch (error) {
+      console.error("Failed to save settings:", error)
+      toast.error("Failed to save settings")
+      setSaving(false)
+      return
+    }
+
+    setSaving(false)
     onOpenChange(false)
   }
 

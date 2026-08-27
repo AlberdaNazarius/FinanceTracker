@@ -5,6 +5,12 @@ import {
   handleApiError,
 } from "@/helpers/server-utils";
 
+const USER_SELECT = `
+  username,
+  dashboard_settings,
+  preferredCurrency:preferred_currency_id (*)
+`;
+
 export async function GET() {
   try {
     const { supabase, user } = await getSupabaseUser();
@@ -15,11 +21,7 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from("user")
-      .select(`
-        username,
-        balance,
-        preferredCurrency:preferred_currency_id (*)
-      `)
+      .select(USER_SELECT)
       .eq("id", user.id)
       .single();
 
@@ -42,20 +44,28 @@ export async function PATCH(req: NextRequest) {
     }
 
     const body = await req.json();
-    const preferredCurrencyId = body?.preferred_currency_id;
+    const update: Record<string, unknown> = {};
 
-    if (!preferredCurrencyId) {
-      return jsonError("preferred_currency_id is required", 400);
+    if (body?.preferred_currency_id) {
+      update.preferred_currency_id = body.preferred_currency_id;
+    }
+
+    if (body?.dashboard_settings) {
+      update.dashboard_settings = body.dashboard_settings;
+    }
+
+    if (Object.keys(update).length === 0) {
+      return jsonError(
+        "preferred_currency_id or dashboard_settings is required",
+        400
+      );
     }
 
     const { data, error } = await supabase
       .from("user")
-      .update({ preferred_currency_id: preferredCurrencyId })
+      .update(update)
       .eq("id", user.id)
-      .select(`
-        username,
-        preferredCurrency:preferred_currency_id (*)
-      `)
+      .select(USER_SELECT)
       .single();
 
     if (error) {

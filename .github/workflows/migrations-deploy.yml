@@ -1,0 +1,39 @@
+name: Deploy migrations
+
+on:
+  push:
+    branches: [prod]
+    paths:
+      - 'supabase/migrations/**'
+  # Lets the first push of a risky migration be triggered by hand instead.
+  workflow_dispatch:
+
+concurrency:
+  group: supabase-migrations
+  cancel-in-progress: false
+
+jobs:
+  push:
+    name: Push migrations to the hosted project
+    runs-on: ubuntu-latest
+
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      PROJECT_REF: eynwtrqdqvadopcgyqvl
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link project
+        run: supabase link --project-ref "$PROJECT_REF"
+
+      - name: Show what will be applied
+        run: supabase migration list --linked
+
+      - name: Push migrations
+        run: supabase db push --yes

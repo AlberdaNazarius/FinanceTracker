@@ -65,6 +65,14 @@ export default function Header() {
             <Link
               className={cn(
                 'text-sm font-semibold text-muted hover:text-primary transition-colors',
+                pathname === Routes.ACCOUNTS && 'text-foreground')}
+              href={Routes.ACCOUNTS}
+            >
+              Accounts
+            </Link>
+            <Link
+              className={cn(
+                'text-sm font-semibold text-muted hover:text-primary transition-colors',
                 pathname === Routes.CATEGORIES && 'text-foreground')}
               href={Routes.CATEGORIES}
             >

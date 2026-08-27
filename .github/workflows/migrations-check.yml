@@ -1,0 +1,30 @@
+name: Migrations check
+
+on:
+  pull_request:
+    branches: [prod, dev]
+    paths:
+      - 'supabase/**'
+      - '.github/workflows/migrations-check.yml'
+
+jobs:
+  verify:
+    name: Apply migrations to a fresh database
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      # Only Postgres is needed to prove the migrations apply; the rest of the
+      # stack would just slow the job down.
+      - name: Start Postgres
+        run: >
+          supabase start
+          -x gotrue,realtime,storage-api,imgproxy,kong,mailpit,postgrest,postgres-meta,studio,edge-runtime,logflare,vector,supavisor
+
+      - name: Rebuild from migrations and seed
+        run: supabase db reset

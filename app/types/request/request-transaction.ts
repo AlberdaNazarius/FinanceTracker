@@ -3,7 +3,7 @@ import {TransactionType} from "@/enum/transaction-type";
 export type RequestTransaction = {
   user_id?: number;
   category_id: string | null;
-  currency_id: number;
+  location_id: string | null;
   type: TransactionType,
   amount: number;
   transaction_date: Date;
