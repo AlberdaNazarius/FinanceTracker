@@ -156,6 +156,7 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
 
         {operationType === OperationKind.TRANSFER ? (
           <Formik
+            key="transfer-form"
             initialValues={transferInitState}
             validationSchema={transferSchema}
             onSubmit={handleTransferSubmit}
@@ -179,6 +180,7 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
           </Formik>
         ) : (
           <Formik
+            key="transaction-form"
             initialValues={transactionInitState}
             validationSchema={transactionSchema}
             onSubmit={handleTransactionSubmit}
