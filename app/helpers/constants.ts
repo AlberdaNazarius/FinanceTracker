@@ -32,6 +32,21 @@ export const ICON_OPTIONS = [
   "📚"
 ]
 
+export const LOCATION_ICON_OPTIONS = [
+  "💳",
+  "💵",
+  "💶",
+  "💴",
+  "💷",
+  "🏦",
+  "👛",
+  "🪙",
+  "📈",
+  "🏠",
+  "🐷",
+  "📱"
+]
+
 export const WARNING_BUDGET_THRESHOLD = 80; // in percentage
 
 export const DANGER_BUDGET_THRESHOLD = 90; // in percentage

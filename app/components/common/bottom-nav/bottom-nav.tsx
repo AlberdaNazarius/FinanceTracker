@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Receipt, Tag, Wallet } from "lucide-react";
+import { Home, Landmark, Receipt, Tag, Wallet } from "lucide-react";
 import { Routes } from "@/enum/routes";
 import { cn } from "@/helpers/utils";
 
@@ -16,6 +16,11 @@ const navItems = [
     label: "Transactions",
     href: Routes.TRANSACTIONS,
     icon: Receipt,
+  },
+  {
+    label: "Accounts",
+    href: Routes.ACCOUNTS,
+    icon: Landmark,
   },
   {
     label: "Categories",
