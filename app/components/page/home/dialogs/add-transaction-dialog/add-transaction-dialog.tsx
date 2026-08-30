@@ -41,11 +41,12 @@ import { toast } from "@/store/toast-store";
 
 type Props = {
   onSuccess?: () => void;
+  trigger?: React.ReactNode;
 };
 
 const today = () => new Date().toISOString().split("T")[0];
 
-const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
+const AddTransactionDialog: React.FC<Props> = ({ onSuccess, trigger }) => {
   const [open, setOpen] = useState(false);
   const [operationType, setOperationType] = useState<OperationFormType>(
     TransactionType.EXPENSE,
@@ -146,11 +147,13 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="cursor-pointer">
-          <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">Add Transaction</span>
-          <span className="sm:hidden">Add</span>
-        </Button>
+        {trigger ?? (
+          <Button className="cursor-pointer">
+            <Plus className="h-4 w-4" />
+            <span className="hidden sm:inline">Add Transaction</span>
+            <span className="sm:hidden">Add</span>
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
