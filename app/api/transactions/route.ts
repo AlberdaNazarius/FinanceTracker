@@ -7,6 +7,8 @@ import {
 } from "@/helpers/server-utils";
 import { TRANSACTION_SELECT } from "@/helpers/query-selects";
 import { resolveLocationCurrency } from "@/helpers/server/location-currency";
+import { getRatesForDate, toBaseAmount } from "@/helpers/server/daily-rates";
+import { CURRENCIES } from "@/helpers/constants";
 
 export async function GET() {
   try {
@@ -56,11 +58,17 @@ export async function POST(req: Request) {
       return jsonError("Location not found or access denied", 400);
     }
 
+    // Normalise at the rate of the transaction's own date so past reports stay put.
+    const code = CURRENCIES.find((currency) => currency.id === currencyId)?.code;
+    const rates = await getRatesForDate(supabase, body.transaction_date);
+    const amountBase = code ? toBaseAmount(Number(body.amount), code, rates) : null;
+
     const {data, error} = await supabase
       .from("transaction")
       .insert({
         ...body,
         currency_id: currencyId,
+        amount_base: amountBase,
         user_id: user.id
       })
       .select(TRANSACTION_SELECT)

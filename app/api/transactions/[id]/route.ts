@@ -2,6 +2,8 @@ import {NextRequest, NextResponse} from "next/server";
 import {getSupabaseUser, jsonError} from "@/helpers/server-utils";
 import {TRANSACTION_SELECT} from "@/helpers/query-selects";
 import {resolveLocationCurrency} from "@/helpers/server/location-currency";
+import {getRatesForDate, toBaseAmount} from "@/helpers/server/daily-rates";
+import {CURRENCIES} from "@/helpers/constants";
 
 export async function PUT(
   req: NextRequest,
@@ -38,6 +40,26 @@ export async function PUT(
       }
 
       body.currency_id = currencyId;
+    }
+
+    if (body.amount !== undefined || body.transaction_date || body.location_id) {
+      const {data: existing} = await supabase
+        .from("transaction")
+        .select("amount, currency_id, transaction_date")
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .single();
+
+      const currencyId = body.currency_id ?? existing?.currency_id;
+      const code = CURRENCIES.find((currency) => currency.id === currencyId)?.code;
+      const rates = await getRatesForDate(
+        supabase,
+        body.transaction_date ?? existing?.transaction_date
+      );
+
+      body.amount_base = code
+        ? toBaseAmount(Number(body.amount ?? existing?.amount), code, rates)
+        : null;
     }
 
     const { data, error } = await supabase
