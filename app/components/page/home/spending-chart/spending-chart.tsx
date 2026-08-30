@@ -4,6 +4,8 @@ import { useState, useMemo } from "react"
 import useUserStore from "@/store/user-store"
 import { TransactionType } from "@/enum/transaction-type"
 import { formatMoney } from "@/helpers/utils"
+import { convert } from "@/helpers/exchange"
+import { useExchangeRates } from "@/hooks/use-exchange-rates"
 import { ResponseTransaction } from "@/types/response/response-transaction"
 import { Skeleton } from "@/components/ui/skeleton"
 
@@ -24,8 +26,9 @@ const SpendingChart = ({ transactions, loading = false }: SpendingChartProps) =>
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
   const user = useUserStore(state => state.user)
   const currencyCode = user?.preferredCurrency?.code
+  const { rates } = useExchangeRates(currencyCode)
 
-  const categorySpending = useMemo(() => {
+  const { categories: categorySpending, missingRate } = useMemo(() => {
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
@@ -40,13 +43,26 @@ const SpendingChart = ({ transactions, loading = false }: SpendingChartProps) =>
 
     const categoryMap = new Map<string, CategorySpending>()
 
+    let missingRate = false
+
     expenseTransactions.forEach((transaction) => {
       if (!transaction.category) return
 
       const categoryId = transaction.category.id
       const categoryName = transaction.category.name
       const categoryColor = transaction.category.color || "#6366f1"
-      const amount = transaction.amount || 0
+
+      const amount = convert(
+        transaction.amount || 0,
+        transaction.currency?.code ?? currencyCode ?? "",
+        currencyCode ?? "",
+        rates
+      )
+
+      if (amount === null) {
+        missingRate = true
+        return
+      }
 
       if (categoryMap.has(categoryId)) {
         const existing = categoryMap.get(categoryId)!
@@ -69,8 +85,11 @@ const SpendingChart = ({ transactions, loading = false }: SpendingChartProps) =>
       category.percentage = total > 0 ? (category.amount / total) * 100 : 0
     })
 
-    return categories.sort((a, b) => b.amount - a.amount)
-  }, [transactions])
+    return {
+      categories: categories.sort((a, b) => b.amount - a.amount),
+      missingRate,
+    }
+  }, [transactions, rates, currencyCode])
 
   const totalSpending = categorySpending.reduce((sum, cat) => sum + cat.amount, 0)
 
@@ -81,6 +100,11 @@ const SpendingChart = ({ transactions, loading = false }: SpendingChartProps) =>
           <h3 className="text-base sm:text-lg font-semibold text-foreground">Spending by Category</h3>
           <p className="text-xs sm:text-sm text-muted">
             Total: {formatMoney(totalSpending, currencyCode)} this month
+            {missingRate && (
+              <span className="block text-danger">
+                Excludes spending in currencies with no exchange rate available.
+              </span>
+            )}
           </p>
         </div>
       </div>
