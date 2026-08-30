@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const BudgetOverview = () => {
   const user = useUserStore((state) => state.user);
   const currencyCode = user?.preferredCurrency?.code;
-  const { budgetsSummary, loading } = useBudgetSummary();
+  const { budgetsSummary, ratesAvailable, loading } = useBudgetSummary();
 
   const topBudgets = useMemo(() => {
     return [...budgetsSummary]
@@ -74,6 +74,12 @@ const BudgetOverview = () => {
       <h3 className="text-base sm:text-lg font-semibold text-foreground mb-4 sm:mb-6">
         Budget Overview
       </h3>
+
+      {!ratesAvailable && (
+        <p className="-mt-3 mb-4 text-xs text-danger">
+          Spending in currencies with no exchange rate is not counted.
+        </p>
+      )}
 
       <div className="space-y-4 sm:space-y-5">
         {topBudgets.map((budget) => {
