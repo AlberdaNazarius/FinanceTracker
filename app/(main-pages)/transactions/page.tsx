@@ -3,7 +3,6 @@
 import TransactionTable from "@/components/page/transactions/transactions-table/transactions-table";
 import SearchBar from "@/components/general/search-bar/search-bar";
 import {useCallback, useEffect, useMemo, useState} from "react";
-import {Plus} from "lucide-react";
 import {useDebounce} from "@/hooks/use-debounce";
 import {useTransactionFeed} from "@/hooks/use-transaction-feed";
 import {useMoneyLocations} from "@/hooks/use-money-locations";
@@ -15,12 +14,11 @@ import {OperationKind} from "@/enum/operation-kind";
 import {Operation} from "@/types/operation";
 import {Category} from "@/types/category";
 import {CategoryService} from "@/service/client/category.service";
-import {Button} from "@/components/ui/button";
 import {cn, getDateRange} from "@/helpers/utils";
 import {convert} from "@/helpers/exchange";
 import {DEFAULT_CURRENCY} from "@/helpers/constants";
 import {DateRange} from "@/enum/date-range";
-import PageHeader from "@/components/common/page-header/page-header";
+import {usePageAction} from "@/hooks/use-page-action";
 import AddTransactionDialog from "@/components/page/home/dialogs/add-transaction-dialog/add-transaction-dialog";
 import PeriodSummary from "@/components/page/transactions/period-summary/period-summary";
 import FilterControls from "@/components/page/transactions/filters/filter-controls";
@@ -55,6 +53,9 @@ const Transactions = () => {
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange>(DateRange.MONTH);
   const [filters, setFilters] = useState<TransactionFilters>(EMPTY_FILTERS);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [addOpen, setAddOpen] = useState(false);
+
+  usePageAction({label: "Add Transaction", onClick: () => setAddOpen(true)});
 
   const debouncedSearch = useDebounce(search);
 
@@ -181,13 +182,11 @@ const Transactions = () => {
 
   return (
     <div className="w-full flex flex-col gap-3 sm:gap-5">
-      <div className="hidden md:block">
-        <PageHeader
-          title="Transactions"
-          subtitle="Browse and manage your activity"
-          action={<AddTransactionDialog onSuccess={refetch} />}
-        />
-      </div>
+      <AddTransactionDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        onSuccess={refetch}
+      />
 
       <PeriodSummary
         range={selectedDateRange}
@@ -255,19 +254,6 @@ const Transactions = () => {
       />
 
       <TransactionTable operations={filteredOperations} refetch={refetch} />
-
-      <AddTransactionDialog
-        onSuccess={refetch}
-        trigger={
-          <Button
-            size="icon"
-            aria-label="Add transaction"
-            className="fixed bottom-20 right-4 z-40 size-14 rounded-full shadow-lg cursor-pointer md:hidden"
-          >
-            <Plus className="size-6" />
-          </Button>
-        }
-      />
     </div>
   );
 };

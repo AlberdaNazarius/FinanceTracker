@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
 import {
   Dialog,
   DialogTrigger,
@@ -42,12 +41,21 @@ import { toast } from "@/store/toast-store";
 type Props = {
   onSuccess?: () => void;
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 const today = () => new Date().toISOString().split("T")[0];
 
-const AddTransactionDialog: React.FC<Props> = ({ onSuccess, trigger }) => {
-  const [open, setOpen] = useState(false);
+const AddTransactionDialog: React.FC<Props> = ({
+  onSuccess,
+  trigger,
+  open: controlledOpen,
+  onOpenChange,
+}) => {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = controlledOpen ?? uncontrolledOpen;
+  const setOpen = onOpenChange ?? setUncontrolledOpen;
   const [operationType, setOperationType] = useState<OperationFormType>(
     TransactionType.EXPENSE,
   );
@@ -146,15 +154,7 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess, trigger }) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger ?? (
-          <Button className="cursor-pointer">
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Add Transaction</span>
-            <span className="sm:hidden">Add</span>
-          </Button>
-        )}
-      </DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
