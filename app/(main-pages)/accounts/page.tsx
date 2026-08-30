@@ -77,8 +77,11 @@ export default function AccountsPage() {
       toast.success(location.archived ? "Location restored" : "Location archived");
       await Promise.all([refetch(), refetchBalance()]);
     } catch (err) {
+      const message =
+        (err as {response?: {data?: {error?: string}}})?.response?.data?.error ??
+        "Failed to update location";
       console.error(err);
-      toast.error("Failed to update location");
+      toast.error(message);
     }
   }, [refetch, refetchBalance]);
 
