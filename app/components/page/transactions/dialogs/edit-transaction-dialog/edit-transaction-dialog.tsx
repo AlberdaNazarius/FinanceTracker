@@ -12,6 +12,8 @@ import {MoneyLocation} from "@/types/money-location"
 import {RequestTransaction} from "@/types/request/request-transaction"
 import {ResponseTransaction} from "@/types/response/response-transaction"
 import {useGroupedCategories} from "@/hooks/use-grouped-categories"
+import {useTags} from "@/hooks/use-tags"
+import {TagService} from "@/service/client/tag.service"
 import TransactionFields from "@/components/common/operation-form/transaction-fields"
 import {transactionSchema} from "@/components/common/operation-form/schema"
 import {TransactionFormValues} from "@/components/common/operation-form/types"
@@ -28,6 +30,7 @@ const EditTransactionDialog: React.FC<Props> = ({transaction, onSuccess}) => {
   const [locations, setLocations] = useState<MoneyLocation[]>([]);
 
   const groupedCategories = useGroupedCategories(open);
+  const {tags: tagSuggestions, refetch: refetchTags} = useTags(open);
 
   useEffect(() => {
     if (!open) return;
@@ -52,6 +55,7 @@ const EditTransactionDialog: React.FC<Props> = ({transaction, onSuccess}) => {
     category_id: transaction?.category?.id ?? null,
     description: transaction?.description ?? "",
     transaction_date: normalizeDateToInput(transaction?.transaction_date),
+    tags: (transaction?.tags ?? []).map((tag) => tag.name),
   };
 
   const handleSubmit = async (values: TransactionFormValues) => {
@@ -60,7 +64,10 @@ const EditTransactionDialog: React.FC<Props> = ({transaction, onSuccess}) => {
       return;
     }
 
+    const resolved = await TagService.resolveTags(values.tags);
+
     const payload: RequestTransaction = {
+      tag_ids: resolved.map((tag) => tag.id),
       type: values.type,
       amount: Number(values.amount),
       location_id: values.location_id,
@@ -75,6 +82,7 @@ const EditTransactionDialog: React.FC<Props> = ({transaction, onSuccess}) => {
     try {
       await TransactionService.updateTransaction(transaction.id, payload);
       toast.success("Transaction updated");
+      refetchTags();
       onSuccess?.();
       setOpen(false);
     } catch (error) {
@@ -130,6 +138,7 @@ const EditTransactionDialog: React.FC<Props> = ({transaction, onSuccess}) => {
                 form={form}
                 locations={locations}
                 groupedCategories={groupedCategories}
+                tagSuggestions={tagSuggestions}
               />
 
               <div className="flex gap-3 pt-2">

@@ -7,6 +7,7 @@ export type TransactionFormValues = {
   category_id: string | null;
   description: string;
   transaction_date: string;
+  tags: string[];
 }
 
 export type TransferFormValues = {

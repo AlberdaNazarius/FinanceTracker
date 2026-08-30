@@ -73,6 +73,7 @@ const TransactionRow = ({ transaction }: { transaction: ResponseTransaction }) =
                   {transaction?.category?.name ?? "N/A"}
                   {transaction?.location && ` · ${transaction.location.name}`} •{" "}
                   {formatDate(transaction?.transaction_date)}
+                  {transaction?.tags?.map((tag) => ` #${tag.name}`).join("")}
                 </span>
               </div>
             </div>
@@ -92,6 +93,18 @@ const TransactionRow = ({ transaction }: { transaction: ResponseTransaction }) =
           {transaction?.location && (
             <div className="text-xs text-muted-foreground truncate">
               {transaction.location.icon} {transaction.location.name}
+            </div>
+          )}
+          {transaction?.tags?.length > 0 && (
+            <div className="mt-1 flex flex-wrap gap-1">
+              {transaction.tags.map((tag) => (
+                <span
+                  key={tag.id}
+                  className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary"
+                >
+                  #{tag.name}
+                </span>
+              ))}
             </div>
           )}
         </div>

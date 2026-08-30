@@ -21,6 +21,8 @@ import { MoneyLocation } from "@/types/money-location";
 import { RequestTransaction } from "@/types/request/request-transaction";
 import { RequestTransfer } from "@/types/transfer";
 import { useGroupedCategories } from "@/hooks/use-grouped-categories";
+import { useTags } from "@/hooks/use-tags";
+import { TagService } from "@/service/client/tag.service";
 import OperationTypeSwitch, {
   OperationFormType,
 } from "@/components/common/operation-form/operation-type-switch";
@@ -51,6 +53,7 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
   const [locations, setLocations] = useState<MoneyLocation[]>([]);
 
   const groupedCategories = useGroupedCategories(open);
+  const {tags: tagSuggestions, refetch: refetchTags} = useTags(open);
 
   useEffect(() => {
     if (!open) return;
@@ -80,6 +83,7 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
     category_id: null,
     description: "",
     transaction_date: today(),
+    tags: [],
   };
 
   const transferInitState: TransferFormValues = {
@@ -93,7 +97,10 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
   };
 
   const handleTransactionSubmit = async (values: TransactionFormValues) => {
+    const resolved = await TagService.resolveTags(values.tags);
+
     const payload: RequestTransaction = {
+      tag_ids: resolved.map((tag) => tag.id),
       type: values.type,
       amount: Number(values.amount),
       location_id: values.location_id,
@@ -105,6 +112,7 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
     try {
       await TransactionService.addTransaction(payload);
       toast.success("Transaction added");
+      refetchTags();
       onSuccess?.();
       setOpen(false);
     } catch (error) {
@@ -193,6 +201,7 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
                   form={form}
                   locations={locations}
                   groupedCategories={groupedCategories}
+                  tagSuggestions={tagSuggestions}
                 />
                 <div className="flex gap-3 pt-2">
                   <DialogClose className="flex-1 cursor-pointer">Cancel</DialogClose>
