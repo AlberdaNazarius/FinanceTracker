@@ -5,9 +5,7 @@ import {Category} from "@/types/category";
 import {CategoryService} from "@/service/client/category.service";
 import CategoryList from "@/components/page/categories/category-list/category-list";
 import AddCategoryDialog from "@/components/page/categories/dialogs/add-category-dialog/add-category-dialog";
-import PageHeader from "@/components/common/page-header/page-header";
-import {Button} from "@/components/ui/button";
-import {Plus} from "lucide-react";
+import {usePageAction} from "@/hooks/use-page-action";
 import {toast} from "@/store/toast-store";
 import {confirm} from "@/store/confirm-store";
 import {Skeleton} from "@/components/ui/skeleton";
@@ -68,6 +66,8 @@ export default function CategoriesPage() {
     setParentForNew(null)
     setIsDialogOpen(true)
   }
+
+  usePageAction({label: "Add Category", onClick: handleAddNew})
 
   const handleAddChild = (parent: Category) => {
     setEditingCategory(null)
@@ -138,20 +138,6 @@ export default function CategoriesPage() {
 
   return (
     <div className="w-full">
-      <div className="mb-6">
-        <PageHeader
-          title="Categories"
-          subtitle="Manage your income and expense categories"
-          action={
-            <Button onClick={handleAddNew} className="cursor-pointer">
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add Category</span>
-              <span className="sm:hidden">Add</span>
-            </Button>
-          }
-        />
-      </div>
-
       {isLoading ? (
         <div className="grid gap-6 lg:grid-cols-2">
           {[0, 1].map((col) => (

@@ -1,6 +1,7 @@
 import React from "react";
 import Header from "@/components/common/header/header";
 import BottomNav from "@/components/common/bottom-nav/bottom-nav";
+import PageActionFab from "@/components/common/page-action/page-action-fab";
 import LoadUserToStore from "@/components/general/load-user-to-store/load-user-to-store";
 import { redirect } from "next/navigation";
 import { Routes } from "@/enum/routes";
@@ -25,6 +26,7 @@ const Layout = async ({
         {children}
       </div>
       <BottomNav />
+      <PageActionFab />
     </>
   );
 };
