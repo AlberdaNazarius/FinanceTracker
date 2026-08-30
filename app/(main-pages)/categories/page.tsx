@@ -5,9 +5,7 @@ import {Category} from "@/types/category";
 import {CategoryService} from "@/service/client/category.service";
 import CategoryList from "@/components/page/categories/category-list/category-list";
 import AddCategoryDialog from "@/components/page/categories/dialogs/add-category-dialog/add-category-dialog";
-import PageHeader from "@/components/common/page-header/page-header";
-import {Button} from "@/components/ui/button";
-import {Plus} from "lucide-react";
+import {usePageAction} from "@/hooks/use-page-action";
 import {toast} from "@/store/toast-store";
 import {confirm} from "@/store/confirm-store";
 import {Skeleton} from "@/components/ui/skeleton";
@@ -15,6 +13,7 @@ import {Skeleton} from "@/components/ui/skeleton";
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [parentForNew, setParentForNew] = useState<Category | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,30 +42,50 @@ export default function CategoriesPage() {
 
   /** ---------------- Derived data ---------------- */
   const incomeCategories = useMemo(
-    () => categories.filter(c => c.type === "income"),
+    () => categories.filter(c => c.type === "income" && !c.parent_id),
     [categories]
   )
 
   const expenseCategories = useMemo(
-    () => categories.filter(c => c.type === "expense"),
+    () => categories.filter(c => c.type === "expense" && !c.parent_id),
+    [categories]
+  )
+
+  const childrenByParent = useMemo(
+    () => categories.reduce<Record<string, Category[]>>((acc, category) => {
+      if (!category.parent_id) return acc;
+      (acc[category.parent_id] ??= []).push(category);
+      return acc;
+    }, {}),
     [categories]
   )
 
   /** ---------------- Handlers ---------------- */
   const handleAddNew = () => {
     setEditingCategory(null)
+    setParentForNew(null)
+    setIsDialogOpen(true)
+  }
+
+  usePageAction({label: "Add Category", onClick: handleAddNew})
+
+  const handleAddChild = (parent: Category) => {
+    setEditingCategory(null)
+    setParentForNew(parent)
     setIsDialogOpen(true)
   }
 
   const handleEdit = (category: Category) => {
     setEditingCategory(category)
+    setParentForNew(null)
     setIsDialogOpen(true)
   }
 
   const handleDelete = useCallback(async (id: string) => {
     const confirmed = await confirm({
       title: "Delete category?",
-      description: "This category will be permanently removed.",
+      description:
+        "This category and any subcategories under it will be permanently removed.",
       confirmText: "Delete",
       destructive: true,
     });
@@ -119,20 +138,6 @@ export default function CategoriesPage() {
 
   return (
     <div className="w-full">
-      <div className="mb-6">
-        <PageHeader
-          title="Categories"
-          subtitle="Manage your income and expense categories"
-          action={
-            <Button onClick={handleAddNew} className="cursor-pointer">
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add Category</span>
-              <span className="sm:hidden">Add</span>
-            </Button>
-          }
-        />
-      </div>
-
       {isLoading ? (
         <div className="grid gap-6 lg:grid-cols-2">
           {[0, 1].map((col) => (
@@ -150,16 +155,20 @@ export default function CategoriesPage() {
           title="Income Categories"
           type="income"
           categories={incomeCategories}
+          childrenByParent={childrenByParent}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onAddChild={handleAddChild}
         />
 
         <CategoryList
           title="Expense Categories"
           type="expense"
           categories={expenseCategories}
+          childrenByParent={childrenByParent}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          onAddChild={handleAddChild}
         />
       </div>
       )}
@@ -167,6 +176,7 @@ export default function CategoriesPage() {
       {isDialogOpen && (
         <AddCategoryDialog
           category={editingCategory}
+          parent={parentForNew}
           onClose={() => setIsDialogOpen(false)}
           onSave={handleSave}
         />

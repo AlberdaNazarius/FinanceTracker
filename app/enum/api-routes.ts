@@ -6,6 +6,7 @@ export enum ApiRoutes {
   BUDGET = '/api/budget',
   BUDGET_SUMMARY = '/api/budget/summary',
   MONEY_LOCATION = '/api/money-location',
+  TAG = '/api/tag',
   TRANSFER = '/api/transfer',
   EXCHANGE_RATES = '/api/exchange-rates',
 }

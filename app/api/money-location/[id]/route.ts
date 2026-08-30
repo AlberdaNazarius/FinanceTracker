@@ -28,6 +28,22 @@ export async function PUT(
       return jsonError("Unauthorized", 401);
     }
 
+    if (body.archived) {
+      const {data: current} = await supabase
+        .from("location_balance")
+        .select("balance, currency_code")
+        .eq("location_id", id)
+        .eq("user_id", user.id)
+        .single();
+
+      if (current && Number(current.balance) !== 0) {
+        return jsonError(
+          `This location still holds ${current.balance} ${current.currency_code}. Transfer it out before archiving.`,
+          409
+        );
+      }
+    }
+
     // Only one location may be the default, so clear the previous one first.
     if (body.is_default) {
       await supabase

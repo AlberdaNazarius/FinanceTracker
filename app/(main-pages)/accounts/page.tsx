@@ -1,7 +1,6 @@
 "use client"
 
 import {useCallback, useMemo, useState} from "react"
-import {Plus} from "lucide-react"
 import {MoneyLocation, MoneyLocationRequest} from "@/types/money-location"
 import {LocationBalance} from "@/types/location-balance"
 import {MoneyLocationService} from "@/service/client/money-location.service"
@@ -9,8 +8,7 @@ import {useMoneyLocations} from "@/hooks/use-money-locations"
 import {useBalance} from "@/hooks/use-balance"
 import LocationList from "@/components/page/accounts/location-list/location-list"
 import AddLocationDialog from "@/components/page/accounts/dialogs/add-location-dialog/add-location-dialog"
-import PageHeader from "@/components/common/page-header/page-header"
-import {Button} from "@/components/ui/button"
+import {usePageAction} from "@/hooks/use-page-action"
 import {Skeleton} from "@/components/ui/skeleton"
 import {toast} from "@/store/toast-store"
 import {confirm} from "@/store/confirm-store"
@@ -47,6 +45,8 @@ export default function AccountsPage() {
     setIsDialogOpen(true);
   }
 
+  usePageAction({label: "Add Location", onClick: handleAddNew});
+
   const handleEdit = (location: MoneyLocation) => {
     setEditingLocation(location);
     setIsDialogOpen(true);
@@ -77,8 +77,11 @@ export default function AccountsPage() {
       toast.success(location.archived ? "Location restored" : "Location archived");
       await Promise.all([refetch(), refetchBalance()]);
     } catch (err) {
+      const message =
+        (err as {response?: {data?: {error?: string}}})?.response?.data?.error ??
+        "Failed to update location";
       console.error(err);
-      toast.error("Failed to update location");
+      toast.error(message);
     }
   }, [refetch, refetchBalance]);
 
@@ -113,20 +116,6 @@ export default function AccountsPage() {
 
   return (
     <div className="w-full">
-      <div className="mb-6">
-        <PageHeader
-          title="Accounts"
-          subtitle="Where your money actually sits"
-          action={
-            <Button onClick={handleAddNew} className="cursor-pointer">
-              <Plus className="h-4 w-4" />
-              <span className="hidden sm:inline">Add Location</span>
-              <span className="sm:hidden">Add</span>
-            </Button>
-          }
-        />
-      </div>
-
       {loading ? (
         <div className="space-y-2">
           {[0, 1, 2].map((row) => (

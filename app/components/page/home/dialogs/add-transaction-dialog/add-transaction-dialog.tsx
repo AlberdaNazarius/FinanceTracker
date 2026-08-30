@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useMemo, useState } from "react";
-import { Plus } from "lucide-react";
 import {
   Dialog,
   DialogTrigger,
@@ -21,6 +20,8 @@ import { MoneyLocation } from "@/types/money-location";
 import { RequestTransaction } from "@/types/request/request-transaction";
 import { RequestTransfer } from "@/types/transfer";
 import { useGroupedCategories } from "@/hooks/use-grouped-categories";
+import { useTags } from "@/hooks/use-tags";
+import { TagService } from "@/service/client/tag.service";
 import OperationTypeSwitch, {
   OperationFormType,
 } from "@/components/common/operation-form/operation-type-switch";
@@ -34,22 +35,34 @@ import {
   TransactionFormValues,
   TransferFormValues,
 } from "@/components/common/operation-form/types";
+import { dateInputToTimestamp } from "@/helpers/utils";
 import { toast } from "@/store/toast-store";
 
 type Props = {
   onSuccess?: () => void;
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 };
 
 const today = () => new Date().toISOString().split("T")[0];
 
-const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
-  const [open, setOpen] = useState(false);
+const AddTransactionDialog: React.FC<Props> = ({
+  onSuccess,
+  trigger,
+  open: controlledOpen,
+  onOpenChange,
+}) => {
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = controlledOpen ?? uncontrolledOpen;
+  const setOpen = onOpenChange ?? setUncontrolledOpen;
   const [operationType, setOperationType] = useState<OperationFormType>(
     TransactionType.EXPENSE,
   );
   const [locations, setLocations] = useState<MoneyLocation[]>([]);
 
   const groupedCategories = useGroupedCategories(open);
+  const {tags: tagSuggestions, refetch: refetchTags} = useTags(open);
 
   useEffect(() => {
     if (!open) return;
@@ -79,6 +92,7 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
     category_id: null,
     description: "",
     transaction_date: today(),
+    tags: [],
   };
 
   const transferInitState: TransferFormValues = {
@@ -92,18 +106,22 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
   };
 
   const handleTransactionSubmit = async (values: TransactionFormValues) => {
+    const resolved = await TagService.resolveTags(values.tags);
+
     const payload: RequestTransaction = {
+      tag_ids: resolved.map((tag) => tag.id),
       type: values.type,
       amount: Number(values.amount),
       location_id: values.location_id,
       category_id: values.category_id,
       description: values.description || "General transaction",
-      transaction_date: new Date(values.transaction_date),
+      transaction_date: dateInputToTimestamp(values.transaction_date),
     };
 
     try {
       await TransactionService.addTransaction(payload);
       toast.success("Transaction added");
+      refetchTags();
       onSuccess?.();
       setOpen(false);
     } catch (error) {
@@ -120,7 +138,7 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
       to_amount: Number(values.to_amount),
       fee_amount: Number(values.fee_amount) || 0,
       description: values.description || undefined,
-      transfer_date: new Date(values.transfer_date),
+      transfer_date: dateInputToTimestamp(values.transfer_date),
     };
 
     try {
@@ -136,13 +154,7 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button className="cursor-pointer">
-          <Plus className="h-4 w-4" />
-          <span className="hidden sm:inline">Add Transaction</span>
-          <span className="sm:hidden">Add</span>
-        </Button>
-      </DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
@@ -192,6 +204,7 @@ const AddTransactionDialog: React.FC<Props> = ({ onSuccess }) => {
                   form={form}
                   locations={locations}
                   groupedCategories={groupedCategories}
+                  tagSuggestions={tagSuggestions}
                 />
                 <div className="flex gap-3 pt-2">
                   <DialogClose className="flex-1 cursor-pointer">Cancel</DialogClose>

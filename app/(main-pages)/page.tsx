@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import useUserStore from "@/store/user-store";
 import { useBalance } from "@/hooks/use-balance";
 import { useTransactions } from "@/hooks/use-transactions";
@@ -10,7 +10,7 @@ import BalanceCard from "@/components/page/home/balance-card/balance-card";
 import SpendingChart from "@/components/page/home/spending-chart/spending-chart";
 import BudgetOverview from "@/components/page/home/budget-overview/budget-overview";
 import AccountsCard from "@/components/page/home/accounts-card/accounts-card";
-import PageHeader from "@/components/common/page-header/page-header";
+import { usePageAction } from "@/hooks/use-page-action";
 import { cn } from "@/helpers/utils";
 
 const Home = () => {
@@ -19,6 +19,10 @@ const Home = () => {
   const { transactions, loading, refetch: refetchTransactions } = useTransactions();
 
   const settings = user?.dashboardSettings ?? DEFAULT_DASHBOARD_SETTINGS;
+
+  const [addOpen, setAddOpen] = useState(false);
+
+  usePageAction({label: "Add Transaction", onClick: () => setAddOpen(true)});
 
   const handleTransactionAdded = async () => {
     await Promise.all([refetchBalance(), refetchTransactions()]);
@@ -35,10 +39,10 @@ const Home = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6 pb-6 w-full">
-      <PageHeader
-        title="Dashboard"
-        subtitle="Your financial overview"
-        action={<AddTransactionDialog onSuccess={handleTransactionAdded} />}
+      <AddTransactionDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        onSuccess={handleTransactionAdded}
       />
 
       {settings.showBalance && (

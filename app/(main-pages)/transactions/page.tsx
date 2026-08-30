@@ -2,20 +2,33 @@
 
 import TransactionTable from "@/components/page/transactions/transactions-table/transactions-table";
 import SearchBar from "@/components/general/search-bar/search-bar";
-import {useEffect, useMemo, useState} from "react";
+import {useCallback, useEffect, useMemo, useState} from "react";
 import {useDebounce} from "@/hooks/use-debounce";
 import {useTransactionFeed} from "@/hooks/use-transaction-feed";
 import {useMoneyLocations} from "@/hooks/use-money-locations";
+import {useTags} from "@/hooks/use-tags";
+import {useExchangeRates} from "@/hooks/use-exchange-rates";
+import useUserStore from "@/store/user-store";
 import {TransactionType} from "@/enum/transaction-type";
 import {OperationKind} from "@/enum/operation-kind";
 import {Operation} from "@/types/operation";
 import {Category} from "@/types/category";
 import {CategoryService} from "@/service/client/category.service";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
 import {cn, getDateRange} from "@/helpers/utils";
+import {convert} from "@/helpers/exchange";
+import {DEFAULT_CURRENCY} from "@/helpers/constants";
 import {DateRange} from "@/enum/date-range";
-import PageHeader from "@/components/common/page-header/page-header";
+import {usePageAction} from "@/hooks/use-page-action";
 import AddTransactionDialog from "@/components/page/home/dialogs/add-transaction-dialog/add-transaction-dialog";
+import PeriodSummary from "@/components/page/transactions/period-summary/period-summary";
+import FilterControls from "@/components/page/transactions/filters/filter-controls";
+import FilterSheet from "@/components/page/transactions/filters/filter-sheet";
+import ActiveFilterChips from "@/components/page/transactions/filters/active-filter-chips";
+import {
+  ALL_FILTER,
+  EMPTY_FILTERS,
+  TransactionFilters,
+} from "@/components/page/transactions/filters/types";
 
 type TypeFilter = TransactionType | OperationKind.TRANSFER | "all";
 
@@ -29,16 +42,30 @@ const TYPE_FILTERS: {value: TypeFilter; label: string}[] = [
 const Transactions = () => {
   const {operations, refetch} = useTransactionFeed();
   const {locations} = useMoneyLocations();
+  const {tags} = useTags();
+
+  const user = useUserStore((state) => state.user);
+  const currencyCode = user?.preferredCurrency?.code ?? DEFAULT_CURRENCY.code;
+  const {rates} = useExchangeRates(currencyCode);
 
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState<TypeFilter>("all");
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [selectedLocation, setSelectedLocation] = useState<string>("all");
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange>(DateRange.MONTH);
+  const [filters, setFilters] = useState<TransactionFilters>(EMPTY_FILTERS);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [addOpen, setAddOpen] = useState(false);
+
+  usePageAction({label: "Add Transaction", onClick: () => setAddOpen(true)});
 
   const debouncedSearch = useDebounce(search);
+
+  const updateFilters = useCallback(
+    (patch: Partial<TransactionFilters>) =>
+      setFilters((current) => ({...current, ...patch})),
+    []
+  );
+
+  const resetFilters = useCallback(() => setFilters(EMPTY_FILTERS), []);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -47,8 +74,6 @@ const Transactions = () => {
         setCategories(response.data);
       } catch (error) {
         console.error("Failed to fetch categories:", error);
-      } finally {
-        setLoadingCategories(false);
       }
     };
 
@@ -67,18 +92,25 @@ const Transactions = () => {
       );
     };
 
-    // A transfer has no category, so any category filter excludes it.
-    const matchesCategory = (operation: Operation) =>
-      selectedCategory === "all" ||
+    const matchesCategory = (operation: Operation) => {
+      if (filters.category === ALL_FILTER) return true;
+      if (operation.kind !== OperationKind.TRANSACTION) return false;
+
+      const category = operation.transaction.category;
+      return category?.id === filters.category || category?.parent_id === filters.category;
+    };
+
+    const matchesTag = (operation: Operation) =>
+      filters.tag === ALL_FILTER ||
       (operation.kind === OperationKind.TRANSACTION &&
-        operation.transaction.category?.id === selectedCategory);
+        (operation.transaction.tags ?? []).some((tag) => tag.id === filters.tag));
 
     const matchesLocation = (operation: Operation) => {
-      if (selectedLocation === "all") return true;
+      if (filters.location === ALL_FILTER) return true;
       return operation.kind === OperationKind.TRANSACTION
-        ? operation.transaction.location?.id === selectedLocation
-        : operation.transfer.from_location?.id === selectedLocation ||
-            operation.transfer.to_location?.id === selectedLocation;
+        ? operation.transaction.location?.id === filters.location
+        : operation.transfer.from_location?.id === filters.location ||
+            operation.transfer.to_location?.id === filters.location;
     };
 
     const dateFrom = getDateRange(selectedDateRange);
@@ -95,6 +127,7 @@ const Transactions = () => {
               operation.transaction.description,
               operation.transaction.category?.name,
               operation.transaction.location?.name,
+              ...(operation.transaction.tags ?? []).map((tag) => tag.name),
             ]
           : [
               operation.transfer.description,
@@ -109,36 +142,69 @@ const Transactions = () => {
       (operation) =>
         matchesType(operation) &&
         matchesCategory(operation) &&
+        matchesTag(operation) &&
         matchesLocation(operation) &&
         matchesDate(operation) &&
         matchesSearch(operation)
     );
-  }, [
-    operations,
-    selectedType,
-    selectedCategory,
-    selectedLocation,
-    selectedDateRange,
-    debouncedSearch,
-  ]);
+  }, [operations, selectedType, filters, selectedDateRange, debouncedSearch]);
+
+  const totals = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+    let approximate = false;
+
+    for (const operation of filteredOperations) {
+      if (operation.kind !== OperationKind.TRANSACTION) continue;
+
+      const {transaction} = operation;
+      const amount = convert(
+        transaction.amount ?? 0,
+        transaction.currency?.code ?? currencyCode,
+        currencyCode,
+        rates
+      );
+
+      if (amount === null) {
+        approximate = true;
+        continue;
+      }
+
+      if (transaction.type === TransactionType.INCOME) {
+        income += amount;
+      } else {
+        expense += amount;
+      }
+    }
+
+    return {income, expense, approximate};
+  }, [filteredOperations, currencyCode, rates]);
 
   return (
-    <div className="w-full flex flex-col gap-4 sm:gap-5">
-      <PageHeader
-        title="Transactions"
-        subtitle="Browse and manage your activity"
-        action={<AddTransactionDialog onSuccess={refetch} />}
+    <div className="w-full flex flex-col gap-3 sm:gap-5">
+      <AddTransactionDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        onSuccess={refetch}
       />
 
-      {/* Filters */}
-      <div className="flex flex-col md:flex-row justify-between gap-3 sm:gap-4">
-        <div className="flex items-center gap-2 flex-wrap">
+      <PeriodSummary
+        range={selectedDateRange}
+        onRangeChange={setSelectedDateRange}
+        income={totals.income}
+        expense={totals.expense}
+        currency={currencyCode}
+        approximate={totals.approximate}
+      />
+
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 sm:gap-4">
+        <div className="-mx-2 flex items-center gap-2 overflow-x-auto px-2 no-scrollbar">
           {TYPE_FILTERS.map((filter) => (
             <button
               key={filter.value}
               onClick={() => setSelectedType(filter.value)}
               className={cn(
-                "px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 cursor-pointer",
+                "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 cursor-pointer",
                 selectedType === filter.value
                   ? "bg-primary text-primary-foreground shadow-md"
                   : "bg-card text-foreground border border-border hover:bg-accent hover:text-accent-foreground"
@@ -149,62 +215,43 @@ const Transactions = () => {
           ))}
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-          {/* Location Filter */}
-          <Select value={selectedLocation} onValueChange={setSelectedLocation}>
-            <SelectTrigger className="cursor-pointer w-full sm:w-[180px]">
-              <SelectValue placeholder="All Locations" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem className="cursor-pointer" value="all">All Locations</SelectItem>
-              {locations.map((location) => (
-                <SelectItem key={location.id} value={location.id} className="cursor-pointer">
-                  <div className="flex items-center gap-2">
-                    <span>{location.icon}</span>
-                    <span>{location.name}</span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          {/* Category Filter */}
-          <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-            <SelectTrigger className="cursor-pointer w-full sm:w-[200px]">
-              <SelectValue placeholder="All Categories" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem className='cursor-pointer' value="all">All Categories</SelectItem>
-              {!loadingCategories &&
-                categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id} className='cursor-pointer'>
-                    <div className="flex items-center gap-2">
-                      <span>{category.icon}</span>
-                      <span>{category.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-
-          {/* Date Range Filter */}
-          <Select
-            value={selectedDateRange}
-            onValueChange={(value) => setSelectedDateRange(value as DateRange)}
-          >
-            <SelectTrigger className="cursor-pointer w-full sm:w-40">
-              <SelectValue placeholder="This month" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem className='cursor-pointer' value={DateRange.WEEK}>Last 7 days</SelectItem>
-              <SelectItem className='cursor-pointer' value={DateRange.MONTH}>This month</SelectItem>
-              <SelectItem className='cursor-pointer' value={DateRange.ALL}>All time</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        <FilterControls
+          filters={filters}
+          onChange={updateFilters}
+          locations={locations}
+          categories={categories}
+          tags={tags}
+          className="hidden md:flex md:gap-4"
+          triggerClassName="w-[180px]"
+        />
       </div>
 
-      <SearchBar value={search} onChange={setSearch} />
+      <div className="flex items-center gap-2">
+        <div className="flex-1 min-w-0">
+          <SearchBar value={search} onChange={setSearch} />
+        </div>
+
+        <FilterSheet
+          filters={filters}
+          onChange={updateFilters}
+          onReset={resetFilters}
+          locations={locations}
+          categories={categories}
+          tags={tags}
+          resultCount={filteredOperations.length}
+          className="md:hidden"
+        />
+      </div>
+
+      <ActiveFilterChips
+        filters={filters}
+        onChange={updateFilters}
+        onReset={resetFilters}
+        locations={locations}
+        categories={categories}
+        tags={tags}
+        className="md:hidden"
+      />
 
       <TransactionTable operations={filteredOperations} refetch={refetch} />
     </div>

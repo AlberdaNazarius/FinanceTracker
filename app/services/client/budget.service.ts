@@ -13,9 +13,12 @@ const getBudgetById = async (budgetId: string): Promise<Budget> => {
   return response.data.data;
 }
 
-const getBudgetSummary = async (): Promise<BudgetSummary[]> => {
+const getBudgetSummary = async (): Promise<{
+  data: BudgetSummary[];
+  ratesAvailable: boolean;
+}> => {
   const response = await axios.get(ApiRoutes.BUDGET_SUMMARY);
-  return response.data.data;
+  return response.data;
 }
 
 const createBudget = async (budgetData: BudgetRequest) => {

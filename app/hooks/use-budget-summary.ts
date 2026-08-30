@@ -4,6 +4,7 @@ import {BudgetSummary} from "@/types/budget-summary";
 
 export function useBudgetSummary() {
   const [budgetsSummary, setBudgetsSummary] = useState<BudgetSummary[]>([]);
+  const [ratesAvailable, setRatesAvailable] = useState(true);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
@@ -11,7 +12,8 @@ export function useBudgetSummary() {
     try {
       setLoading(true);
       const result = await BudgetService.getBudgetSummary();
-      setBudgetsSummary(result);
+      setBudgetsSummary(result.data ?? []);
+      setRatesAvailable(result.ratesAvailable);
     } catch (err) {
       setError(err as Error);
     } finally {
@@ -25,6 +27,7 @@ export function useBudgetSummary() {
 
   return {
     budgetsSummary,
+    ratesAvailable,
     loading,
     error,
     refetch: fetchBudgetsSummary

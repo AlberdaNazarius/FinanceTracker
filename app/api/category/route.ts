@@ -17,7 +17,8 @@ export async function GET() {
         name,
         type,
         color,
-        icon
+        icon,
+        parent_id
       `)
       .order("name", { ascending: false });
 

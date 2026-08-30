@@ -14,7 +14,8 @@ export async function GET() {
       .from("transfer")
       .select(TRANSFER_SELECT)
       .eq("user_id", user.id)
-      .order("transfer_date", {ascending: false});
+      .order("transfer_date", {ascending: false})
+      .order("created_at", {ascending: false});
 
     if (error) {
       return jsonError(error.message, 400);

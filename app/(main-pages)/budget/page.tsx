@@ -10,8 +10,7 @@ import { useBudgetSummary } from "@/hooks/use-budget-summary";
 import { DANGER_BUDGET_THRESHOLD } from "@/helpers/constants";
 import { Budget } from "@/types/budget";
 import BudgetDetailsCard from "@/components/page/budget/budget-details-card/budget-details-card";
-import PageHeader from "@/components/common/page-header/page-header";
-import { Button } from "@/components/ui/button";
+import { usePageAction } from "@/hooks/use-page-action";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "@/store/toast-store";
 import { confirm } from "@/store/confirm-store";
@@ -35,6 +34,8 @@ const BudgetPage = () => {
     setEditingBudget(null);
     setIsDialogOpen(true);
   };
+
+  usePageAction({label: "Add Budget", onClick: handleAddBudget});
 
   const handleEditBudget = async (budgetId: string) => {
     const editingBudget = await BudgetService.getBudgetById(budgetId);
@@ -87,17 +88,6 @@ const BudgetPage = () => {
 
   return (
     <div className="w-full space-y-4 sm:space-y-6">
-      <PageHeader
-        title="Budget"
-        subtitle="Manage your monthly spending limits"
-        action={
-          <Button onClick={handleAddBudget} className="cursor-pointer">
-            <Plus className="h-4 w-4" />
-            <span className="hidden sm:inline">Add Budget</span>
-            <span className="sm:hidden">Add</span>
-          </Button>
-        }
-      />
       <AddBudgetDialog
         budget={editingBudget}
         open={isDialogOpen}

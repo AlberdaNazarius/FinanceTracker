@@ -7,6 +7,9 @@ export type GroupedCategories = {
   [key in TransactionType]?: Category[];
 }
 
+export const childrenOf = (categories: Category[] | undefined, parentId: string) =>
+  (categories ?? []).filter((category) => category.parent_id === parentId);
+
 /** Fetches categories grouped by type, but only once `enabled` flips on. */
 export function useGroupedCategories(enabled: boolean) {
   const [groupedCategories, setGroupedCategories] = useState<GroupedCategories>({});

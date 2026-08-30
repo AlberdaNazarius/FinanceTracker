@@ -1,7 +1,10 @@
 import {NextRequest, NextResponse} from "next/server";
 import {getSupabaseUser, jsonError} from "@/helpers/server-utils";
 import {TRANSACTION_SELECT} from "@/helpers/query-selects";
+import {flattenTags, syncTransactionTags} from "@/helpers/server/transaction-tags";
 import {resolveLocationCurrency} from "@/helpers/server/location-currency";
+import {getRatesForDate, toBaseAmount} from "@/helpers/server/daily-rates";
+import {CURRENCIES} from "@/helpers/constants";
 
 export async function PUT(
   req: NextRequest,
@@ -26,6 +29,9 @@ export async function PUT(
       return jsonError("Unauthorized", 401);
     }
 
+    const tagIds: string[] | undefined = body.tag_ids;
+    delete body.tag_ids;
+
     if (body.location_id) {
       const currencyId = await resolveLocationCurrency(
         supabase,
@@ -38,6 +44,26 @@ export async function PUT(
       }
 
       body.currency_id = currencyId;
+    }
+
+    if (body.amount !== undefined || body.transaction_date || body.location_id) {
+      const {data: existing} = await supabase
+        .from("transaction")
+        .select("amount, currency_id, transaction_date")
+        .eq("id", id)
+        .eq("user_id", user.id)
+        .single();
+
+      const currencyId = body.currency_id ?? existing?.currency_id;
+      const code = CURRENCIES.find((currency) => currency.id === currencyId)?.code;
+      const rates = await getRatesForDate(
+        supabase,
+        body.transaction_date ?? existing?.transaction_date
+      );
+
+      body.amount_base = code
+        ? toBaseAmount(Number(body.amount ?? existing?.amount), code, rates)
+        : null;
     }
 
     const { data, error } = await supabase
@@ -57,7 +83,11 @@ export async function PUT(
       return jsonError("Transaction not found or access denied", 404);
     }
 
-    return NextResponse.json({ data }, { status: 200 });
+    if (tagIds) {
+      await syncTransactionTags(supabase, id, tagIds);
+    }
+
+    return NextResponse.json({ data: flattenTags(data) }, { status: 200 });
   } catch (error) {
     console.error("PUT /transaction error:", error);
     return jsonError("Unexpected server error", 500);

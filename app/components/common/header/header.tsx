@@ -1,6 +1,6 @@
 "use client"
 
-import {CircleDollarSign, LogOut, Settings, User} from "lucide-react"
+import {CircleDollarSign, LogOut, Plus, Settings, User} from "lucide-react"
 import Link from "next/link"
 import {useState} from "react";
 import useUserStore from "@/store/user-store";
@@ -15,11 +15,14 @@ import {Button} from "@/components/ui/button";
 import {useRouter, usePathname} from "next/navigation";
 import {cn} from "@/helpers/utils";
 import SettingsDialog from "@/components/common/settings-dialog/settings-dialog";
+import usePageActionStore from "@/store/page-action-store";
 
 export default function Header() {
   const {user} = useUserStore();
   const router = useRouter();
   const pathname = usePathname()
+
+  const pageAction = usePageActionStore((state) => state.action);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -90,6 +93,17 @@ export default function Header() {
 
           {/* User Menu */}
           <div className="flex items-center gap-2 sm:gap-3">
+            {pageAction && (
+              <Button
+                size="sm"
+                onClick={pageAction.onClick}
+                className="hidden md:inline-flex cursor-pointer"
+              >
+                <Plus className="h-4 w-4" />
+                {pageAction.label}
+              </Button>
+            )}
+
             {user ? (
               <DropdownMenu open={menuOpen} onOpenChange={setMenuOpen}>
                 <DropdownMenuTrigger asChild>

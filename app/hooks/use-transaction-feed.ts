@@ -38,17 +38,23 @@ export function useTransactionFeed() {
         kind: OperationKind.TRANSACTION as const,
         id: transaction.id,
         date: String(transaction.transaction_date),
+        createdAt: String(transaction.created_at),
         transaction,
       })),
       ...transfers.map((transfer) => ({
         kind: OperationKind.TRANSFER as const,
         id: transfer.id,
         date: String(transfer.transfer_date),
+        createdAt: String(transfer.created_at),
         transfer,
       })),
     ];
 
-    return merged.sort((a, b) => b.date.localeCompare(a.date));
+    const time = (value: string) => new Date(value).getTime();
+
+    return merged.sort(
+      (a, b) => time(b.date) - time(a.date) || time(b.createdAt) - time(a.createdAt)
+    );
   }, [transactions, transfers]);
 
   return {
