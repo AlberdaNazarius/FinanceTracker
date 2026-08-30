@@ -7,6 +7,8 @@ import {Label} from "@/components/ui/label"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
 import {MoneyLocation} from "@/types/money-location"
 import {GroupedCategories} from "@/hooks/use-grouped-categories"
+import {Tag} from "@/types/tag"
+import TagInput from "./tag-input"
 import {getCurrencySymbol} from "@/helpers/utils"
 import {TransactionFormValues} from "./types"
 
@@ -14,9 +16,15 @@ type Props = {
   form: FormikProps<TransactionFormValues>
   locations: MoneyLocation[]
   groupedCategories: GroupedCategories
+  tagSuggestions: Tag[]
 }
 
-const TransactionFields: React.FC<Props> = ({form, locations, groupedCategories}) => {
+const TransactionFields: React.FC<Props> = ({
+  form,
+  locations,
+  groupedCategories,
+  tagSuggestions,
+}) => {
   const {values, handleChange, setFieldValue, touched, errors} = form;
 
   const selectedLocation = locations.find((location) => location.id === values.location_id);
@@ -94,15 +102,28 @@ const TransactionFields: React.FC<Props> = ({form, locations, groupedCategories}
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
           <SelectContent>
-            {categories?.map((category) => (
-              <SelectItem
-                key={category.id}
-                value={category.id}
-                className="cursor-pointer"
-              >
-                {category.name}
-              </SelectItem>
-            ))}
+            {categories
+              ?.filter((category) => !category.parent_id)
+              .map((parent) => [
+                <SelectItem
+                  key={parent.id}
+                  value={parent.id}
+                  className="cursor-pointer font-medium"
+                >
+                  {parent.name}
+                </SelectItem>,
+                ...categories
+                  .filter((child) => child.parent_id === parent.id)
+                  .map((child) => (
+                    <SelectItem
+                      key={child.id}
+                      value={child.id}
+                      className="cursor-pointer pl-8 text-muted-foreground"
+                    >
+                      {child.name}
+                    </SelectItem>
+                  )),
+              ])}
             {!categories?.length && (
               <div className="p-2 text-xs text-center text-muted-foreground">
                 No {values.type} categories found
@@ -124,6 +145,12 @@ const TransactionFields: React.FC<Props> = ({form, locations, groupedCategories}
           onChange={handleChange}
         />
       </div>
+
+      <TagInput
+        value={values.tags}
+        suggestions={tagSuggestions}
+        onChange={(tags) => setFieldValue("tags", tags)}
+      />
 
       <div className="space-y-2">
         <Label htmlFor="transaction_date">Date</Label>

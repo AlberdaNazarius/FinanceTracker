@@ -6,6 +6,7 @@ import {useEffect, useMemo, useState} from "react";
 import {useDebounce} from "@/hooks/use-debounce";
 import {useTransactionFeed} from "@/hooks/use-transaction-feed";
 import {useMoneyLocations} from "@/hooks/use-money-locations";
+import {useTags} from "@/hooks/use-tags";
 import {TransactionType} from "@/enum/transaction-type";
 import {OperationKind} from "@/enum/operation-kind";
 import {Operation} from "@/types/operation";
@@ -29,11 +30,13 @@ const TYPE_FILTERS: {value: TypeFilter; label: string}[] = [
 const Transactions = () => {
   const {operations, refetch} = useTransactionFeed();
   const {locations} = useMoneyLocations();
+  const {tags} = useTags();
 
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState<TypeFilter>("all");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedLocation, setSelectedLocation] = useState<string>("all");
+  const [selectedTag, setSelectedTag] = useState<string>("all");
   const [selectedDateRange, setSelectedDateRange] = useState<DateRange>(DateRange.MONTH);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
@@ -67,11 +70,18 @@ const Transactions = () => {
       );
     };
 
-    // A transfer has no category, so any category filter excludes it.
-    const matchesCategory = (operation: Operation) =>
-      selectedCategory === "all" ||
+    const matchesCategory = (operation: Operation) => {
+      if (selectedCategory === "all") return true;
+      if (operation.kind !== OperationKind.TRANSACTION) return false;
+
+      const category = operation.transaction.category;
+      return category?.id === selectedCategory || category?.parent_id === selectedCategory;
+    };
+
+    const matchesTag = (operation: Operation) =>
+      selectedTag === "all" ||
       (operation.kind === OperationKind.TRANSACTION &&
-        operation.transaction.category?.id === selectedCategory);
+        (operation.transaction.tags ?? []).some((tag) => tag.id === selectedTag));
 
     const matchesLocation = (operation: Operation) => {
       if (selectedLocation === "all") return true;
@@ -95,6 +105,7 @@ const Transactions = () => {
               operation.transaction.description,
               operation.transaction.category?.name,
               operation.transaction.location?.name,
+              ...(operation.transaction.tags ?? []).map((tag) => tag.name),
             ]
           : [
               operation.transfer.description,
@@ -109,6 +120,7 @@ const Transactions = () => {
       (operation) =>
         matchesType(operation) &&
         matchesCategory(operation) &&
+        matchesTag(operation) &&
         matchesLocation(operation) &&
         matchesDate(operation) &&
         matchesSearch(operation)
@@ -117,6 +129,7 @@ const Transactions = () => {
     operations,
     selectedType,
     selectedCategory,
+    selectedTag,
     selectedLocation,
     selectedDateRange,
     debouncedSearch,
@@ -176,14 +189,42 @@ const Transactions = () => {
             <SelectContent>
               <SelectItem className='cursor-pointer' value="all">All Categories</SelectItem>
               {!loadingCategories &&
-                categories.map((category) => (
-                  <SelectItem key={category.id} value={category.id} className='cursor-pointer'>
-                    <div className="flex items-center gap-2">
-                      <span>{category.icon}</span>
-                      <span>{category.name}</span>
-                    </div>
-                  </SelectItem>
-                ))}
+                categories
+                  .filter((category) => !category.parent_id)
+                  .map((parent) => [
+                    <SelectItem key={parent.id} value={parent.id} className='cursor-pointer'>
+                      <div className="flex items-center gap-2">
+                        <span>{parent.icon}</span>
+                        <span>{parent.name}</span>
+                      </div>
+                    </SelectItem>,
+                    ...categories
+                      .filter((child) => child.parent_id === parent.id)
+                      .map((child) => (
+                        <SelectItem
+                          key={child.id}
+                          value={child.id}
+                          className='cursor-pointer pl-8 text-muted-foreground'
+                        >
+                          {child.name}
+                        </SelectItem>
+                      )),
+                  ])}
+            </SelectContent>
+          </Select>
+
+          {/* Tag Filter */}
+          <Select value={selectedTag} onValueChange={setSelectedTag}>
+            <SelectTrigger className="cursor-pointer w-full sm:w-[160px]">
+              <SelectValue placeholder="All Tags" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem className="cursor-pointer" value="all">All Tags</SelectItem>
+              {tags.map((tag) => (
+                <SelectItem key={tag.id} value={tag.id} className="cursor-pointer">
+                  #{tag.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
 

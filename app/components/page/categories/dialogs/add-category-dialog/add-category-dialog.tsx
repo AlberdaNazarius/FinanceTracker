@@ -13,19 +13,21 @@ import {TransactionType} from "@/enum/transaction-type";
 
 type Props = {
   category: Category | null
+  parent?: Category | null
   onClose: () => void
   onSave: (values: Category) => Promise<void> | void
 }
 
-const AddCategoryDialog: React.FC<Props> = ({category, onClose, onSave}) => {
+const AddCategoryDialog: React.FC<Props> = ({category, parent, onClose, onSave}) => {
   const initialValues = useMemo<CategoryCreate>(
     () => ({
       name: category?.name ?? "",
-      type: category?.type ?? TransactionType.EXPENSE,
-      color: category?.color ?? "#3b82f6",
+      type: category?.type ?? parent?.type ?? TransactionType.EXPENSE,
+      color: category?.color ?? parent?.color ?? "#3b82f6",
       icon: category?.icon ?? "📁",
+      parent_id: category?.parent_id ?? parent?.id ?? null,
     }),
-    [category]
+    [category, parent]
   );
 
   const handleSubmit = useCallback(
@@ -44,7 +46,11 @@ const AddCategoryDialog: React.FC<Props> = ({category, onClose, onSave}) => {
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
-            {category ? "Edit Category" : "Add New Category"}
+            {category
+              ? "Edit Category"
+              : parent
+                ? `Add Subcategory to ${parent.name}`
+                : "Add New Category"}
           </DialogTitle>
         </DialogHeader>
 
@@ -72,7 +78,7 @@ const AddCategoryDialog: React.FC<Props> = ({category, onClose, onSave}) => {
               </div>
 
               {/* Type */}
-              {!category && (
+              {!category && !parent && (
                 <div className="space-y-2">
                   <Label>Type</Label>
                   <div className="flex gap-2">
