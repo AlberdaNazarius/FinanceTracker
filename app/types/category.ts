@@ -6,6 +6,7 @@ export type Category = {
   type: TransactionType;
   color: string
   icon: string
+  parent_id: string | null
 }
 
 export type CategoryCreate = Omit<Category, 'id'>;

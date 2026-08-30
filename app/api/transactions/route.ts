@@ -6,6 +6,7 @@ import {
   handleApiError,
 } from "@/helpers/server-utils";
 import { TRANSACTION_SELECT } from "@/helpers/query-selects";
+import { flattenTags, flattenTagsAll, syncTransactionTags } from "@/helpers/server/transaction-tags";
 import { resolveLocationCurrency } from "@/helpers/server/location-currency";
 import { getRatesForDate, toBaseAmount } from "@/helpers/server/daily-rates";
 import { CURRENCIES } from "@/helpers/constants";
@@ -24,7 +25,7 @@ export async function GET() {
       return jsonError(error.message, 400);
     }
 
-    return NextResponse.json({ data }, { status: 200 });
+    return NextResponse.json({ data: flattenTagsAll(data ?? []) }, { status: 200 });
   } catch (error) {
     return handleApiError(error, "GET /transactions");
   }
@@ -48,6 +49,8 @@ export async function POST(req: Request) {
       return jsonError("location_id is required", 400);
     }
 
+    const {tag_ids: tagIds = [], ...fields} = body;
+
     const currencyId = await resolveLocationCurrency(
       supabase,
       user.id,
@@ -66,7 +69,7 @@ export async function POST(req: Request) {
     const {data, error} = await supabase
       .from("transaction")
       .insert({
-        ...body,
+        ...fields,
         currency_id: currencyId,
         amount_base: amountBase,
         user_id: user.id
@@ -78,7 +81,11 @@ export async function POST(req: Request) {
       return jsonError(error.message, 400);
     }
 
-    return NextResponse.json({ data }, { status: 201 });
+    if (tagIds.length > 0) {
+      await syncTransactionTags(supabase, data.id, tagIds);
+    }
+
+    return NextResponse.json({ data: flattenTags(data) }, { status: 201 });
   } catch (error) {
     return handleApiError(
       error,

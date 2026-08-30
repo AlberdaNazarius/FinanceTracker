@@ -1,6 +1,7 @@
 import {NextRequest, NextResponse} from "next/server";
 import {getSupabaseUser, jsonError} from "@/helpers/server-utils";
 import {TRANSACTION_SELECT} from "@/helpers/query-selects";
+import {flattenTags, syncTransactionTags} from "@/helpers/server/transaction-tags";
 import {resolveLocationCurrency} from "@/helpers/server/location-currency";
 import {getRatesForDate, toBaseAmount} from "@/helpers/server/daily-rates";
 import {CURRENCIES} from "@/helpers/constants";
@@ -27,6 +28,9 @@ export async function PUT(
     if (!user) {
       return jsonError("Unauthorized", 401);
     }
+
+    const tagIds: string[] | undefined = body.tag_ids;
+    delete body.tag_ids;
 
     if (body.location_id) {
       const currencyId = await resolveLocationCurrency(
@@ -79,7 +83,11 @@ export async function PUT(
       return jsonError("Transaction not found or access denied", 404);
     }
 
-    return NextResponse.json({ data }, { status: 200 });
+    if (tagIds) {
+      await syncTransactionTags(supabase, id, tagIds);
+    }
+
+    return NextResponse.json({ data: flattenTags(data) }, { status: 200 });
   } catch (error) {
     console.error("PUT /transaction error:", error);
     return jsonError("Unexpected server error", 500);

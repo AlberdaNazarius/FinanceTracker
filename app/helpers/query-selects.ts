@@ -25,5 +25,6 @@ export const TRANSACTION_SELECT = `
   *,
   category:category_id (*),
   currency:currency_id (*),
-  location:location_id (${MONEY_LOCATION_SELECT})
+  location:location_id (${MONEY_LOCATION_SELECT}),
+  tags:transaction_tag (tag:tag_id (id, name))
 `;
